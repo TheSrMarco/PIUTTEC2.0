@@ -1,0 +1,119 @@
+/* ==========================================================================
+   PIUTTEC 2.0 - HOJA DE ESTILOS PRINCIPAL (SOPORTE MODO CLARO Y MODO OSCURO)
+   ========================================================================== */
+
+:root {
+    --bg-primary: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-elevated: #f1f5f9;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-subtle: #e2e8f0;
+    --scrollbar-thumb: rgba(148, 163, 184, 0.35);
+    --scrollbar-thumb-hover: rgba(148, 163, 184, 0.65);
+    --brand-accent: #4f46e5;
+    --brand-glow: rgba(79, 70, 229, 0.18);
+    color-scheme: light;
+}
+
+html.dark {
+    --bg-primary: #020617;
+    --bg-surface: #0f172a;
+    --bg-elevated: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-subtle: #1e293b;
+    --scrollbar-thumb: rgba(100, 116, 139, 0.45);
+    --scrollbar-thumb-hover: rgba(148, 163, 184, 0.7);
+    --brand-accent: #6366f1;
+    --brand-glow: rgba(99, 102, 241, 0.25);
+    color-scheme: dark;
+}
+
+/* Transiciones suaves al alternar tema */
+body,
+aside,
+header,
+section,
+input,
+select,
+button,
+table,
+tr,
+td,
+th {
+    transition: background-color 0.22s ease, border-color 0.22s ease, color 0.18s ease, box-shadow 0.22s ease;
+}
+
+/* Inputs nativos (date, number) adaptados al modo oscuro */
+html.dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(0.9);
+    cursor: pointer;
+}
+
+/* Animación de entrada de vistas y modales */
+.fade-in {
+    animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbars adaptativos */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+}
+
+/* Patrón decorativo para Credencial Digital Estudiantil */
+.id-card-pattern {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+    background-size: 14px 14px;
+}
+
+/* Resplandor de enfoque accesible */
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--brand-accent);
+    outline-offset: 2px;
+}
+
+/* Estilos de impresión limpios (ignora tema oscuro al imprimir horario) */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        overflow: visible !important;
+    }
+    aside,
+    header,
+    #toastContainer {
+        display: none !important;
+    }
+    main {
+        overflow: visible !important;
+        padding: 0 !important;
+    }
+}

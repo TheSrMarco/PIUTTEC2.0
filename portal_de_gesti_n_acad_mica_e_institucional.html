@@ -43,29 +43,24 @@
         }
     </script>
 
-    <style>
-        /* Animaciones y utilidades visuales */
-        .fade-in {
-            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* Scrollbars personalizados */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
+    <!-- Evita parpadeo blanco al cargar en modo oscuro -->
+    <script>
+        (function() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('piuttec_v2_state_2026'));
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if ((saved && saved.darkMode === true) || (!saved && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
+                }
+            } catch (e) {}
+        })();
+    </script>
 
-        /* Patrón sutil para credencial digital */
-        .id-card-pattern {
-            background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px);
-            background-size: 14px 14px;
-        }
-    </style>
+    <!-- Estilos externos -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-brand-500 selection:text-white overflow-hidden">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-brand-500 selection:text-white overflow-hidden transition-colors duration-300">
 
     <div class="flex h-screen overflow-hidden">
 
@@ -75,7 +70,7 @@
         <!-- ==========================================================
              BARRA LATERAL (SIDEBAR)
              ========================================================== -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-68 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 lg:static lg:inset-0 shrink-0">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-68 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-300 -translate-x-full lg:translate-x-0 lg:static lg:inset-0 shrink-0">
             <!-- Logo Institucional -->
             <div class="h-16 flex items-center justify-between px-5 border-b border-slate-200 dark:border-slate-800 shrink-0">
                 <div class="flex items-center gap-3">
@@ -109,7 +104,7 @@
                         <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Ing. en TICs • 9° Cuatrimestre</p>
                         <div class="flex items-center gap-1.5 mt-1">
                             <span class="text-[10px] font-semibold px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 rounded-md">2026-0842</span>
-                            <button onclick="openModal('modalCredencial')" class="text-[10px] font-semibold px-2 py-0.5 bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300 rounded-md hover:bg-brand-100 transition" title="Ver Credencial Digital NFC">
+                            <button onclick="openModal('modalCredencial')" class="text-[10px] font-semibold px-2 py-0.5 bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300 rounded-md hover:bg-brand-100 dark:hover:bg-brand-900/60 transition" title="Ver Credencial Digital NFC">
                                 <i class="fa-solid fa-id-card mr-0.5"></i> ID Digital
                             </button>
                         </div>
@@ -218,8 +213,8 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
             <!-- HEADER SUPERIOR -->
-            <header class="h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8 z-10 shrink-0">
-                <!-- Izquierda: Menú Móvil + Buscador Global con Atajo Ctrl+K -->
+            <header class="h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8 z-10 shrink-0 transition-colors duration-300">
+                <!-- Izquierda: Menú Móvil + Buscador Global -->
                 <div class="flex items-center gap-3 flex-1 max-w-xl">
                     <button onclick="toggleMobileSidebar()" aria-label="Abrir menú" class="lg:hidden p-2 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
                         <i class="fa-solid fa-bars text-lg"></i>
@@ -227,7 +222,7 @@
                     
                     <div class="relative flex-1 max-w-md">
                         <i class="fa-solid fa-magnifying-glass text-xs absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="globalSearchInput" oninput="handleGlobalSearch(this.value)" placeholder="Buscar materias, tareas, archivos, docentes..." class="w-full pl-9 pr-14 py-2 text-sm bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/60 focus:bg-white dark:focus:bg-slate-800 border border-transparent focus:border-brand-500 rounded-xl outline-none transition-all placeholder:text-slate-400">
+                        <input type="text" id="globalSearchInput" oninput="handleGlobalSearch(this.value)" placeholder="Buscar materias, tareas, archivos, docentes..." class="w-full pl-9 pr-14 py-2 text-sm bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/60 dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 border border-transparent focus:border-brand-500 rounded-xl outline-none transition-all placeholder:text-slate-400">
                         <kbd class="hidden sm:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 bg-white dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600">Ctrl K</kbd>
                         <div id="globalSearchResults" class="hidden absolute left-0 mt-2 w-full sm:w-[420px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-3 z-50 max-h-96 overflow-y-auto"></div>
                     </div>
@@ -261,8 +256,8 @@
                         </div>
                     </div>
 
-                    <!-- Modo Oscuro -->
-                    <button onclick="toggleDarkMode()" class="p-2 rounded-xl text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Cambiar Tema Claro/Oscuro">
+                    <!-- Switch de Modo Oscuro -->
+                    <button id="darkModeToggleBtn" onclick="toggleDarkMode()" aria-label="Alternar modo oscuro" aria-pressed="false" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all" title="Cambiar Tema Claro/Oscuro">
                         <i id="themeIcon" class="fa-solid fa-moon"></i>
                     </button>
 
@@ -287,11 +282,8 @@
             <!-- CONTENEDOR DE VISTAS -->
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
 
-                <!-- ==========================================
-                     1. VISTA: PANEL PRINCIPAL (DASHBOARD)
-                     ========================================== -->
+                <!-- 1. PANEL PRINCIPAL -->
                 <section id="view-dashboard" class="tab-view fade-in space-y-6">
-                    <!-- Banner de Bienvenida + Temporizador Pomodoro de Estudio -->
                     <div class="bg-gradient-to-r from-slate-900 via-brand-900 to-indigo-900 text-white rounded-3xl p-6 shadow-lg flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
                         <div class="relative z-10 space-y-1.5">
                             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-semibold backdrop-blur-xs">
@@ -304,7 +296,6 @@
                             </p>
                         </div>
 
-                        <!-- Mini Temporizador Pomodoro Integrado -->
                         <div class="relative z-10 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 flex items-center gap-4 shrink-0">
                             <div class="w-11 h-11 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center text-xl">
                                 <i class="fa-solid fa-stopwatch"></i>
@@ -324,7 +315,7 @@
                         </div>
                     </div>
 
-                    <!-- KPIs Principales -->
+                    <!-- KPIs -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div onclick="switchTab('materias')" class="cursor-pointer bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md hover:border-brand-300 dark:hover:border-brand-700 transition flex items-center justify-between">
                             <div>
@@ -371,7 +362,7 @@
                         </div>
                     </div>
 
-                    <!-- Gráfica de Rendimiento + Préstamos Activos -->
+                    <!-- Gráfica + Columna Lateral -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
@@ -389,7 +380,6 @@
                             </div>
                         </div>
 
-                        <!-- Columna Derecha: Préstamos + Próxima Entrega -->
                         <div class="space-y-6">
                             <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs">
                                 <div class="flex items-center justify-between mb-3">
@@ -422,9 +412,7 @@
                     </div>
                 </section>
 
-                <!-- ==========================================
-                     2. VISTA: GESTIÓN DE MATERIAS
-                     ========================================== -->
+                <!-- 2. MATERIAS -->
                 <section id="view-materias" class="tab-view hidden fade-in space-y-6">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800">
                         <div>
@@ -438,9 +426,7 @@
                     <div id="materiasGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
                 </section>
 
-                <!-- ==========================================
-                     3. VISTA: HORARIO SEMANAL
-                     ========================================== -->
+                <!-- 3. HORARIO -->
                 <section id="view-horario" class="tab-view hidden fade-in space-y-6">
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -473,9 +459,7 @@
                     </div>
                 </section>
 
-                <!-- ==========================================
-                     4. VISTA: CONTROL DE ASISTENCIAS
-                     ========================================== -->
+                <!-- 4. ASISTENCIAS -->
                 <section id="view-asistencias" class="tab-view hidden fade-in space-y-6">
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
@@ -522,9 +506,7 @@
                     </div>
                 </section>
 
-                <!-- ==========================================
-                     5. VISTA: GESTOR DE ARCHIVOS Y APUNTES
-                     ========================================== -->
+                <!-- 5. ARCHIVOS -->
                 <section id="view-archivos" class="tab-view hidden fade-in space-y-6">
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div>
@@ -547,18 +529,16 @@
 
                     <div class="flex items-center gap-2 overflow-x-auto pb-1" id="fileCategoryPills">
                         <button onclick="setFileCategory('ALL')" data-cat="ALL" class="file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 text-white transition">Todos</button>
-                        <button onclick="setFileCategory('Apuntes')" data-cat="Apuntes" class="file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition">Apuntes</button>
-                        <button onclick="setFileCategory('Tareas')" data-cat="Tareas" class="file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition">Tareas / Entregas</button>
-                        <button onclick="setFileCategory('Prácticas')" data-cat="Prácticas" class="file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition">Prácticas / Código</button>
-                        <button onclick="setFileCategory('Guías')" data-cat="Guías" class="file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition">Guías y Libros</button>
+                        <button onclick="setFileCategory('Apuntes')" data-cat="Apuntes" class="file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Apuntes</button>
+                        <button onclick="setFileCategory('Tareas')" data-cat="Tareas" class="file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Tareas / Entregas</button>
+                        <button onclick="setFileCategory('Prácticas')" data-cat="Prácticas" class="file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Prácticas / Código</button>
+                        <button onclick="setFileCategory('Guías')" data-cat="Guías" class="file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Guías y Libros</button>
                     </div>
 
                     <div id="filesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
                 </section>
 
-                <!-- ==========================================
-                     6. VISTA: PEDIR SALONES Y EQUIPOS
-                     ========================================== -->
+                <!-- 6. RESERVAS -->
                 <section id="view-reservas" class="tab-view hidden fade-in space-y-6">
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
@@ -597,12 +577,9 @@
                     </div>
                 </section>
 
-                <!-- ==========================================
-                     7. VISTA: TRÁMITES Y DOCUMENTOS OFICIALES
-                     ========================================== -->
+                <!-- 7. TRÁMITES -->
                 <section id="view-tramites" class="tab-view hidden fade-in space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Solicitar Justificante -->
                         <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-11 h-11 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg">
@@ -642,7 +619,6 @@
                             </form>
                         </div>
 
-                        <!-- Documentos Oficiales con Token -->
                         <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-11 h-11 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg">
@@ -683,9 +659,7 @@
                     </div>
                 </section>
 
-                <!-- ==========================================
-                     8. VISTA: AGENDA Y TAREAS PENDIENTES
-                     ========================================== -->
+                <!-- 8. TAREAS -->
                 <section id="view-tareas" class="tab-view hidden fade-in space-y-6">
                     <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -716,9 +690,7 @@
                     </div>
                 </section>
 
-                <!-- ==========================================
-                     9. VISTA: SIMULADOR DE REFUERZO ACADÉMICO
-                     ========================================== -->
+                <!-- 9. REFUERZO ACADÉMICO -->
                 <section id="view-refuerzo" class="tab-view hidden fade-in" aria-labelledby="refuerzoTitle">
                     <div class="max-w-3xl bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-5 shadow-xs">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
@@ -746,9 +718,7 @@
                     </div>
                 </section>
 
-                <!-- ==========================================
-                     10. VISTA: DIRECTORIO Y CALCULADORA PROMEDIO
-                     ========================================== -->
+                <!-- 10. HERRAMIENTAS -->
                 <section id="view-herramientas" class="tab-view hidden fade-in space-y-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-4 shadow-xs">
@@ -780,9 +750,9 @@
         </div>
     </div>
 
-    <!-- ==========================================
+    <!-- ==========================================================
          MODALES INTERACTIVOS
-         ========================================== -->
+         ========================================================== -->
 
     <!-- MODAL 0: CREDENCIAL DIGITAL ESTUDIANTIL NFC / QR -->
     <div id="modalCredencial" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
@@ -999,11 +969,8 @@
     <!-- Contenedor de Notificaciones Toast -->
     <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-xs w-full pointer-events-none"></div>
 
-    <!-- ==========================================================
-         LÓGICA COMPLETA E INTERACTIVA (PERSISTENTE EN LOCALSTORAGE)
-         ========================================================== -->
+    <!-- Scripts externos -->
     <script src="Script_Main.js"></script>
     <script src="privacidad.js"></script>
-    
 </body>
 </html>

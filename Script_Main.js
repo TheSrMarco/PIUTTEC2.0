@@ -1,7 +1,11 @@
+/* ==========================================================================
+   PIUTTEC 2.0 - LÓGICA PRINCIPAL E INTERACTIVIDAD (Script_Main.js)
+   ========================================================================== */
+
 const STORAGE_KEY = 'piuttec_v2_state_2026';
 
 const defaultState = {
-    darkMode: false,
+    darkMode: null, // null = detecta preferencia del sistema operativo automáticamente
     materias: [
         { id: 'm1', codigo: 'TICS-901', nombre: 'Bases de Datos Distribuidas', profesor: 'MTI Jesús E. Romero', email: 'j.romero@uttec.edu.mx', cubiculo: 'Edif. D - Cub. 12', asesoria: 'Mar y Jue 14:00-15:00', salon: 'Lab Cómputo 2', horario: 'Lun y Mié 15:00 - 17:00', nota: 9.5, grupal: 8.2, p: 18, r: 1, j: 0, f: 1, color: '#4f46e5' },
         { id: 'm2', codigo: 'TICS-902', nombre: 'Extracción y Visualización de Datos', profesor: 'Dra. Elena Ríos', email: 'e.rios@uttec.edu.mx', cubiculo: 'Edif. D - Cub. 04', asesoria: 'Lun y Mié 17:00-18:00', salon: 'Lab Big Data A-102', horario: 'Mar y Jue 15:00 - 17:00', nota: 9.8, grupal: 8.5, p: 20, r: 0, j: 0, f: 0, color: '#0ea5e9' },
@@ -65,14 +69,18 @@ function loadState() {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) return JSON.parse(saved);
-    } catch (e) { console.warn('Error leyendo localStorage', e); }
+    } catch (e) {
+        console.warn('Error leyendo localStorage', e);
+    }
     return JSON.parse(JSON.stringify(defaultState));
 }
 
 function saveState() {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-    } catch (e) { console.warn('Error guardando localStorage', e); }
+    } catch (e) {
+        console.warn('Error guardando localStorage', e);
+    }
 }
 
 function resetDemoData() {
@@ -84,7 +92,55 @@ function resetDemoData() {
 }
 
 /* ==========================================================
-   NAVEGACIÓN Y TEMA
+   GESTIÓN DE MODO OSCURO (MANUAL + DETECCIÓN DEL SISTEMA)
+   ========================================================== */
+function isDarkModeActive() {
+    if (typeof appState.darkMode === 'boolean') {
+        return appState.darkMode;
+    }
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function toggleDarkMode() {
+    const nextDark = !isDarkModeActive();
+    appState.darkMode = nextDark;
+    saveState();
+    applyTheme();
+    updateGradesChart();
+    showToast(nextDark ? 'Modo oscuro activado' : 'Modo claro activado', 'info');
+}
+
+function applyTheme() {
+    const html = document.documentElement;
+    const icon = document.getElementById('themeIcon');
+    const toggleBtn = document.getElementById('darkModeToggleBtn');
+    const dark = isDarkModeActive();
+
+    if (dark) {
+        html.classList.add('dark');
+        html.classList.remove('light');
+        if (icon) icon.className = 'fa-solid fa-sun text-amber-400';
+        if (toggleBtn) toggleBtn.setAttribute('aria-pressed', 'true');
+    } else {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        if (icon) icon.className = 'fa-solid fa-moon';
+        if (toggleBtn) toggleBtn.setAttribute('aria-pressed', 'false');
+    }
+}
+
+// Escucha cambios del tema del sistema operativo si el usuario no forzó uno manualmente
+if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (appState.darkMode === null) {
+            applyTheme();
+            updateGradesChart();
+        }
+    });
+}
+
+/* ==========================================================
+   NAVEGACIÓN Y SIDEBAR MÓVIL
    ========================================================== */
 function switchTab(tabId) {
     document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
@@ -116,34 +172,15 @@ function toggleMobileSidebar() {
 }
 
 function closeMobileSidebar() {
-    document.getElementById('sidebar').classList.add('-translate-x-full');
-    document.getElementById('sidebarOverlay').classList.add('hidden');
-}
-
-function toggleDarkMode() {
-    appState.darkMode = !appState.darkMode;
-    saveState();
-    applyTheme();
-    updateGradesChart();
-}
-
-function applyTheme() {
-    const html = document.documentElement;
-    const icon = document.getElementById('themeIcon');
-    if (appState.darkMode) {
-        html.classList.add('dark');
-        icon.className = 'fa-solid fa-sun text-amber-400';
-    } else {
-        html.classList.remove('dark');
-        icon.className = 'fa-solid fa-moon';
-    }
+    document.getElementById('sidebar')?.classList.add('-translate-x-full');
+    document.getElementById('sidebarOverlay')?.classList.add('hidden');
 }
 
 /* ==========================================================
    MODALES Y NOTIFICACIONES TOAST
    ========================================================== */
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function openModal(id) { document.getElementById(id)?.classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id)?.classList.add('hidden'); }
 
 function openReservaModal(preselectedResource = null) {
     populateSelects();
@@ -158,6 +195,7 @@ function openTaskModal() { populateSelects(); openModal('modalTask'); }
 
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');
+    if (!container) return;
     const colors = {
         success: 'bg-emerald-600 text-white',
         warning: 'bg-amber-600 text-white',
@@ -205,7 +243,7 @@ function calcGlobalAttendance() {
 }
 
 /* ==========================================================
-   RENDERIZADO DE VISTAS
+   RENDERIZADO GENERAL
    ========================================================== */
 function renderAll() {
     populateSelects();
@@ -242,7 +280,6 @@ function updateBadges() {
     document.getElementById('kpiTareasPendientes').textContent = pendingTasks;
     document.getElementById('dashPendingCountText').textContent = `${pendingTasks} entrega${pendingTasks === 1 ? '' : 's'} pendiente${pendingTasks === 1 ? '' : 's'}`;
 
-    // Almacenamiento simulado
     const totalMB = appState.archivos.reduce((acc, f) => acc + (parseFloat(f.size) || 1.5), 0).toFixed(1);
     const pct = Math.min(100, Math.round((totalMB / 5120) * 100) + 12);
     document.getElementById('storageText').textContent = `${totalMB} MB / 5 GB`;
@@ -273,55 +310,52 @@ function populateSelects() {
 
 /* --- 1. DASHBOARD --- */
 function renderDashboard() {
-    // Préstamos activos
     const activeLoans = appState.prestamos.filter(p => p.estado !== 'Devuelto');
     const loansContainer = document.getElementById('dashboardActiveLoans');
     loansContainer.innerHTML = activeLoans.length ? activeLoans.map(l => `
-                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700 flex items-center justify-between gap-2">
-                    <div class="overflow-hidden">
-                        <p class="text-xs font-bold truncate">${l.recurso}</p>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400">${l.fecha} • ${l.horario}</p>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 shrink-0">${l.estado}</span>
-                </div>
-            `).join('') : '<p class="text-xs text-slate-400">Sin préstamos activos actualmente.</p>';
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700 flex items-center justify-between gap-2">
+            <div class="overflow-hidden">
+                <p class="text-xs font-bold truncate">${l.recurso}</p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">${l.fecha} • ${l.horario}</p>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 shrink-0">${l.estado}</span>
+        </div>
+    `).join('') : '<p class="text-xs text-slate-400">Sin préstamos activos actualmente.</p>';
 
-    // Próximas entregas
     const upcoming = appState.tareas.filter(t => !t.completada).slice(0, 3);
     const tasksContainer = document.getElementById('dashboardUpcomingTasks');
     tasksContainer.innerHTML = upcoming.length ? upcoming.map(t => `
-                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700 flex items-start justify-between gap-2">
-                    <div class="overflow-hidden">
-                        <p class="text-xs font-bold truncate">${t.titulo}</p>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${t.materia} • Límite: ${t.fecha}</p>
-                    </div>
-                    <button onclick="toggleTaskComplete('${t.id}')" class="text-xs text-emerald-600 hover:text-emerald-700 font-bold shrink-0" title="Marcar completada">
-                        <i class="fa-regular fa-circle-check text-base"></i>
-                    </button>
-                </div>
-            `).join('') : '<p class="text-xs text-emerald-600 font-semibold">¡Todas tus entregas están al día!</p>';
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700 flex items-start justify-between gap-2">
+            <div class="overflow-hidden">
+                <p class="text-xs font-bold truncate">${t.titulo}</p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${t.materia} • Límite: ${t.fecha}</p>
+            </div>
+            <button onclick="toggleTaskComplete('${t.id}')" class="text-xs text-emerald-600 hover:text-emerald-700 font-bold shrink-0" title="Marcar completada">
+                <i class="fa-regular fa-circle-check text-base"></i>
+            </button>
+        </div>
+    `).join('') : '<p class="text-xs text-emerald-600 font-semibold">¡Todas tus entregas están al día!</p>';
 
-    // Pase de lista rápido
     const schedContainer = document.getElementById('dashboardScheduleList');
     schedContainer.innerHTML = appState.materias.map(m => {
         const pct = calcMateriaAsistenciaPct(m);
         const badgeColor = pct >= 80 ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950 dark:text-emerald-400' : 'text-rose-600 bg-rose-50 dark:bg-rose-950 dark:text-rose-400';
         return `
-                    <div class="p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between gap-3">
-                        <div class="overflow-hidden">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${m.color}"></span>
-                                <h4 class="text-xs font-bold truncate">${m.nombre}</h4>
-                            </div>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${m.salon} • ${m.horario}</p>
-                        </div>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-lg ${badgeColor}">${pct}%</span>
-                            <button onclick="registerAttendance('${m.id}', 'P')" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition" title="Registrar Presente">P</button>
-                            <button onclick="registerAttendance('${m.id}', 'R')" class="w-7 h-7 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition" title="Registrar Retardo">R</button>
-                        </div>
+            <div class="p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center justify-between gap-3">
+                <div class="overflow-hidden">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${m.color}"></span>
+                        <h4 class="text-xs font-bold truncate">${m.nombre}</h4>
                     </div>
-                `;
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${m.salon} • ${m.horario}</p>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-lg ${badgeColor}">${pct}%</span>
+                    <button onclick="registerAttendance('${m.id}', 'P')" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition" title="Registrar Presente">P</button>
+                    <button onclick="registerAttendance('${m.id}', 'R')" class="w-7 h-7 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition" title="Registrar Retardo">R</button>
+                </div>
+            </div>
+        `;
     }).join('');
 
     updateGradesChart();
@@ -329,10 +363,10 @@ function renderDashboard() {
 
 function updateGradesChart() {
     const ctx = document.getElementById('gradesChart');
-    if (!ctx) return;
+    if (!ctx || typeof Chart === 'undefined') return;
     if (gradesChartInstance) gradesChartInstance.destroy();
 
-    const isDark = appState.darkMode;
+    const isDark = isDarkModeActive();
     const gridColor = isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.2)';
     const textColor = isDark ? '#cbd5e1' : '#475569';
 
@@ -344,7 +378,7 @@ function updateGradesChart() {
                 {
                     label: 'Tu Calificación',
                     data: appState.materias.map(m => m.nota),
-                    backgroundColor: '#4f46e5',
+                    backgroundColor: isDark ? '#6366f1' : '#4f46e5',
                     borderRadius: 8,
                     barPercentage: 0.55
                 },
@@ -389,31 +423,31 @@ function renderMaterias() {
             : `<span class="text-[11px] font-bold text-rose-700 bg-rose-100 dark:bg-rose-950 dark:text-rose-300 px-2.5 py-0.5 rounded-full">Riesgo ${pct}%</span>`;
 
         return `
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between space-y-4">
-                        <div>
-                            <div class="flex items-center justify-between gap-2 mb-2">
-                                <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg text-white" style="background:${m.color}">${m.codigo}</span>
-                                ${statusBadge}
-                            </div>
-                            <h3 class="font-display font-bold text-base leading-snug">${m.nombre}</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1"><i class="fa-solid fa-chalkboard-user mr-1.5 text-slate-400"></i>${m.profesor}</p>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1.5 text-slate-400"></i>${m.salon} • ${m.horario}</p>
-                        </div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between space-y-4">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg text-white" style="background:${m.color}">${m.codigo}</span>
+                        ${statusBadge}
+                    </div>
+                    <h3 class="font-display font-bold text-base leading-snug">${m.nombre}</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1"><i class="fa-solid fa-chalkboard-user mr-1.5 text-slate-400"></i>${m.profesor}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"><i class="fa-solid fa-location-dot mr-1.5 text-slate-400"></i>${m.salon} • ${m.horario}</p>
+                </div>
 
-                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                            <div>
-                                <span class="text-[11px] text-slate-400 block">Calificación Actual</span>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                    <input type="number" step="0.1" min="0" max="10" value="${m.nota}" onchange="updateMateriaGrade('${m.id}', this.value)" class="w-16 text-sm font-extrabold bg-slate-100 dark:bg-slate-800 rounded-lg px-2 py-1 text-center border border-slate-200 dark:border-slate-700">
-                                    <span class="text-[11px] text-slate-400">Grupal: ${m.grupal}</span>
-                                </div>
-                            </div>
-                            <button onclick="deleteMateria('${m.id}')" class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/50 transition" title="Dar de baja materia">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] text-slate-400 block">Calificación Actual</span>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <input type="number" step="0.1" min="0" max="10" value="${m.nota}" onchange="updateMateriaGrade('${m.id}', this.value)" class="w-16 text-sm font-extrabold bg-slate-100 dark:bg-slate-800 rounded-lg px-2 py-1 text-center border border-slate-200 dark:border-slate-700">
+                            <span class="text-[11px] text-slate-400">Grupal: ${m.grupal}</span>
                         </div>
                     </div>
-                `;
+                    <button onclick="deleteMateria('${m.id}')" class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/50 transition" title="Dar de baja materia">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+        `;
     }).join('');
 }
 
@@ -478,22 +512,22 @@ function renderHorario() {
             const mat = appState.materias.find(m => m.codigo === code);
             if (!mat) return `<span class="text-slate-400 italic">${code}</span>`;
             return `
-                        <div class="p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/60" style="border-left: 3px solid ${mat.color}">
-                            <span class="font-bold text-slate-900 dark:text-white block">${mat.nombre}</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">${mat.salon}</span>
-                        </div>
-                    `;
+                <div class="p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/60" style="border-left: 3px solid ${mat.color}">
+                    <span class="font-bold text-slate-900 dark:text-white block">${mat.nombre}</span>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">${mat.salon}</span>
+                </div>
+            `;
         };
         return `
-                    <tr>
-                        <td class="py-3.5 px-4 font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">${b.hora}</td>
-                        <td class="py-2.5 px-3">${renderCell(b.lun)}</td>
-                        <td class="py-2.5 px-3">${renderCell(b.mar)}</td>
-                        <td class="py-2.5 px-3">${renderCell(b.mie)}</td>
-                        <td class="py-2.5 px-3">${renderCell(b.jue)}</td>
-                        <td class="py-2.5 px-3">${renderCell(b.vie)}</td>
-                    </tr>
-                `;
+            <tr>
+                <td class="py-3.5 px-4 font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">${b.hora}</td>
+                <td class="py-2.5 px-3">${renderCell(b.lun)}</td>
+                <td class="py-2.5 px-3">${renderCell(b.mar)}</td>
+                <td class="py-2.5 px-3">${renderCell(b.mie)}</td>
+                <td class="py-2.5 px-3">${renderCell(b.jue)}</td>
+                <td class="py-2.5 px-3">${renderCell(b.vie)}</td>
+            </tr>
+        `;
     }).join('');
 }
 
@@ -509,32 +543,32 @@ function renderAsistencias() {
             : `<span class="text-xs font-bold text-rose-600 dark:text-rose-400">Extraordinario (${pct}%)</span>`;
 
         return `
-                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
-                        <td class="py-3.5 px-4">
-                            <p class="font-bold text-xs">${m.nombre}</p>
-                            <p class="text-[11px] text-slate-500">${m.codigo} • ${m.salon}</p>
-                        </td>
-                        <td class="py-3.5 px-4 text-center font-bold text-xs">${total}</td>
-                        <td class="py-3.5 px-4 text-center text-xs font-semibold">
-                            <span class="text-emerald-600">${m.p}</span> /
-                            <span class="text-amber-600">${m.r}</span> /
-                            <span class="text-sky-600">${m.j}</span> /
-                            <span class="text-rose-600">${m.f}</span>
-                        </td>
-                        <td class="py-3.5 px-4">
-                            <div class="flex items-center justify-between mb-1">${statusText}</div>
-                            <div class="w-36 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div class="h-full ${barColor} rounded-full transition-all" style="width:${pct}%"></div>
-                            </div>
-                        </td>
-                        <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
-                            <button onclick="registerAttendance('${m.id}', 'P')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold" title="Presente">P</button>
-                            <button onclick="registerAttendance('${m.id}', 'R')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold" title="Retardo">R</button>
-                            <button onclick="registerAttendance('${m.id}', 'J')" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold" title="Justificado">J</button>
-                            <button onclick="registerAttendance('${m.id}', 'F')" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold" title="Falta">F</button>
-                        </td>
-                    </tr>
-                `;
+            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                <td class="py-3.5 px-4">
+                    <p class="font-bold text-xs">${m.nombre}</p>
+                    <p class="text-[11px] text-slate-500">${m.codigo} • ${m.salon}</p>
+                </td>
+                <td class="py-3.5 px-4 text-center font-bold text-xs">${total}</td>
+                <td class="py-3.5 px-4 text-center text-xs font-semibold">
+                    <span class="text-emerald-600">${m.p}</span> /
+                    <span class="text-amber-600">${m.r}</span> /
+                    <span class="text-sky-600">${m.j}</span> /
+                    <span class="text-rose-600">${m.f}</span>
+                </td>
+                <td class="py-3.5 px-4">
+                    <div class="flex items-center justify-between mb-1">${statusText}</div>
+                    <div class="w-36 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div class="h-full ${barColor} rounded-full transition-all" style="width:${pct}%"></div>
+                    </div>
+                </td>
+                <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
+                    <button onclick="registerAttendance('${m.id}', 'P')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold" title="Presente">P</button>
+                    <button onclick="registerAttendance('${m.id}', 'R')" class="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold" title="Retardo">R</button>
+                    <button onclick="registerAttendance('${m.id}', 'J')" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold" title="Justificado">J</button>
+                    <button onclick="registerAttendance('${m.id}', 'F')" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold" title="Falta">F</button>
+                </td>
+            </tr>
+        `;
     }).join('');
 
     const logsContainer = document.getElementById('asistenciaHistoryLogs');
@@ -547,14 +581,14 @@ function renderAsistencias() {
         };
         const labels = { P: 'Presente', R: 'Retardo', J: 'Justificado', F: 'Falta' };
         return `
-                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex items-center justify-between gap-2">
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold truncate">${log.materia}</p>
-                            <p class="text-[11px] text-slate-400">${log.fecha} • ${log.hora} hrs</p>
-                        </div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badges[log.tipo]}">${labels[log.tipo]}</span>
-                    </div>
-                `;
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 flex items-center justify-between gap-2">
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold truncate">${log.materia}</p>
+                    <p class="text-[11px] text-slate-400">${log.fecha} • ${log.hora} hrs</p>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badges[log.tipo]}">${labels[log.tipo]}</span>
+            </div>
+        `;
     }).join('');
 }
 
@@ -589,7 +623,7 @@ function setFileCategory(cat) {
         const active = btn.getAttribute('data-cat') === cat;
         btn.className = active
             ? 'file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-brand-600 text-white transition'
-            : 'file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition';
+            : 'file-cat-btn px-3.5 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition';
     });
     renderFiles();
 }
@@ -607,30 +641,30 @@ function renderFiles() {
 
     const grid = document.getElementById('filesGrid');
     grid.innerHTML = filtered.length ? filtered.map(f => `
-                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-3">
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-xs shrink-0">
-                            ${f.ext}
-                        </div>
-                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${f.categoria}</span>
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold truncate" title="${f.titulo}">${f.titulo}</h4>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${f.materia}</p>
-                    </div>
-                    <div class="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-                        <span>${f.size} • ${f.fecha}</span>
-                        <div class="flex items-center gap-1">
-                            <button onclick="downloadSimulatedFile('${f.id}')" class="p-1.5 text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-950 rounded-lg transition" title="Descargar">
-                                <i class="fa-solid fa-download"></i>
-                            </button>
-                            <button onclick="deleteFile('${f.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition" title="Eliminar">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-xs hover:shadow-md transition flex flex-col justify-between space-y-3">
+            <div class="flex items-start justify-between gap-2">
+                <div class="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-xs shrink-0">
+                    ${f.ext}
                 </div>
-            `).join('') : '<div class="col-span-full text-center py-10 text-xs text-slate-400">No se encontraron archivos con esos filtros.</div>';
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${f.categoria}</span>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold truncate" title="${f.titulo}">${f.titulo}</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${f.materia}</p>
+            </div>
+            <div class="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                <span>${f.size} • ${f.fecha}</span>
+                <div class="flex items-center gap-1">
+                    <button onclick="downloadSimulatedFile('${f.id}')" class="p-1.5 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950 rounded-lg transition" title="Descargar">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                    <button onclick="deleteFile('${f.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition" title="Eliminar">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('') : '<div class="col-span-full text-center py-10 text-xs text-slate-400">No se encontraron archivos con esos filtros.</div>';
 }
 
 function handleRealFileSelect(e) {
@@ -707,43 +741,43 @@ function filterResources(cat) {
 function renderReservas() {
     const filtered = appState.recursos.filter(r => currentResourceFilter === 'ALL' || r.categoria === currentResourceFilter);
     document.getElementById('resourcesCatalogGrid').innerHTML = filtered.map(r => `
-                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-xs flex flex-col justify-between space-y-3">
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${r.categoria}</span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${r.disponible ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'}">
-                                ${r.disponible ? 'Disponible' : 'Ocupado'}
-                            </span>
-                        </div>
-                        <h4 class="text-xs font-bold">${r.nombre}</h4>
-                        <p class="text-[11px] text-slate-500 mt-0.5"><i class="fa-solid fa-map-pin mr-1"></i>${r.ubicacion}</p>
-                        <p class="text-[11px] text-slate-400 mt-1.5">${r.specs}</p>
-                    </div>
-                    <button ${r.disponible ? `onclick="openReservaModal('${r.nombre}')"` : 'disabled'} class="w-full py-2 rounded-xl text-xs font-semibold transition ${r.disponible ? 'bg-brand-600 hover:bg-brand-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}">
-                        ${r.disponible ? 'Solicitar Préstamo' : 'No Disponible'}
-                    </button>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-xs flex flex-col justify-between space-y-3">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${r.categoria}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${r.disponible ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'}">
+                        ${r.disponible ? 'Disponible' : 'Ocupado'}
+                    </span>
                 </div>
-            `).join('');
+                <h4 class="text-xs font-bold">${r.nombre}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5"><i class="fa-solid fa-map-pin mr-1"></i>${r.ubicacion}</p>
+                <p class="text-[11px] text-slate-400 mt-1.5">${r.specs}</p>
+            </div>
+            <button ${r.disponible ? `onclick="openReservaModal('${r.nombre}')"` : 'disabled'} class="w-full py-2 rounded-xl text-xs font-semibold transition ${r.disponible ? 'bg-brand-600 hover:bg-brand-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'}">
+                ${r.disponible ? 'Solicitar Préstamo' : 'No Disponible'}
+            </button>
+        </div>
+    `).join('');
 
     document.getElementById('loansTableBody').innerHTML = appState.prestamos.map(p => {
         const badge = p.estado === 'Devuelto'
             ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
             : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
         return `
-                    <tr>
-                        <td class="py-3 px-4">
-                            <span class="font-mono text-[11px] text-brand-600 dark:text-brand-400 font-bold block">${p.id}</span>
-                            <span class="text-xs font-bold">${p.recurso}</span>
-                        </td>
-                        <td class="py-3 px-4 text-xs">${p.categoria}</td>
-                        <td class="py-3 px-4 text-xs">${p.fecha}<br><span class="text-slate-400">${p.horario}</span></td>
-                        <td class="py-3 px-4 text-xs max-w-xs truncate">${p.motivo}</td>
-                        <td class="py-3 px-4"><span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full ${badge}">${p.estado}</span></td>
-                        <td class="py-3 px-4 text-right">
-                            ${p.estado !== 'Devuelto' ? `<button onclick="returnLoan('${p.id}')" class="text-xs font-semibold text-amber-600 hover:underline">Liberar / Devolver</button>` : '<span class="text-xs text-slate-400">Finalizado</span>'}
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td class="py-3 px-4">
+                    <span class="font-mono text-[11px] text-brand-600 dark:text-brand-400 font-bold block">${p.id}</span>
+                    <span class="text-xs font-bold">${p.recurso}</span>
+                </td>
+                <td class="py-3 px-4 text-xs">${p.categoria}</td>
+                <td class="py-3 px-4 text-xs">${p.fecha}<br><span class="text-slate-400">${p.horario}</span></td>
+                <td class="py-3 px-4 text-xs max-w-xs truncate">${p.motivo}</td>
+                <td class="py-3 px-4"><span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full ${badge}">${p.estado}</span></td>
+                <td class="py-3 px-4 text-right">
+                    ${p.estado !== 'Devuelto' ? `<button onclick="returnLoan('${p.id}')" class="text-xs font-semibold text-amber-600 hover:underline">Liberar / Devolver</button>` : '<span class="text-xs text-slate-400">Finalizado</span>'}
+                </td>
+            </tr>
+        `;
     }).join('');
 }
 
@@ -780,16 +814,16 @@ function returnLoan(id) {
 /* --- 7. TRÁMITES Y DOCUMENTOS OFICIALES --- */
 function renderTramites() {
     document.getElementById('tramitesHistoryList').innerHTML = appState.tramites.map(t => `
-                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-1.5">
-                    <div class="flex items-center justify-between">
-                        <span class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400">${t.id}</span>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">${t.estado}</span>
-                    </div>
-                    <h4 class="text-xs font-bold">${t.tipo}</h4>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400">${t.detalle}</p>
-                    <p class="text-[10px] text-slate-400">Fecha: ${t.fecha}</p>
-                </div>
-            `).join('');
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-1.5">
+            <div class="flex items-center justify-between">
+                <span class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400">${t.id}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">${t.estado}</span>
+            </div>
+            <h4 class="text-xs font-bold">${t.tipo}</h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">${t.detalle}</p>
+            <p class="text-[10px] text-slate-400">Fecha: ${t.fecha}</p>
+        </div>
+    `).join('');
 }
 
 function submitJustificante(e) {
@@ -837,20 +871,19 @@ function handleDownloadOfficialDoc(e) {
     saveState();
     renderAll();
 
-    // Generar vista previa imprimible oficial
     const win = window.open('', '_blank', 'width=800,height=650');
     if (win) {
         win.document.write(`
-                    <html><head><title>${docType} - UTTec</title>
-                    <style>body{font-family:Arial,sans-serif;padding:48px;color:#1e293b;line-height:1.6} .header{border-bottom:3px solid #006847;padding-bottom:16px;margin-bottom:24px} .seal{margin-top:40px;padding:16px;background:#f8fafc;border:1px solid #cbd5e1;font-family:monospace;font-size:12px}</style>
-                    </head><body>
-                    <div class="header"><h2>UNIVERSIDAD TECNOLÓGICA DE TECÁMAC</h2><p>Dirección de Servicios Escolares • Campus Tecámac, Edo. Méx.</p></div>
-                    <h3>${docType.toUpperCase()}</h3>
-                    <p>A QUIEN CORRESPONDA:</p>
-                    <p>Por medio de la presente se hace constar que la alumna <strong>SOFÍA MARTÍNEZ LÓPEZ</strong>, con matrícula <strong>2026-0842</strong>, se encuentra inscrita como estudiante regular en el <strong>9° Cuatrimestre</strong> de la carrera de <strong>Ingeniería en Tecnologías de la Información y Comunicación</strong>, con un promedio general acumulado de <strong>${calcGlobalAverage()}</strong>.</p>
-                    <div class="seal"><strong>SELLO DIGITAL DE AUTENTICIDAD</strong><br>Folio: ${folio} | Token: ${token} | Fecha de emisión: 15 de noviembre de 2026</div>
-                    <script>window.print();<\/script></body></html>
-                `);
+            <html><head><title>${docType} - UTTec</title>
+            <style>body{font-family:Arial,sans-serif;padding:48px;color:#1e293b;line-height:1.6} .header{border-bottom:3px solid #006847;padding-bottom:16px;margin-bottom:24px} .seal{margin-top:40px;padding:16px;background:#f8fafc;border:1px solid #cbd5e1;font-family:monospace;font-size:12px}</style>
+            </head><body>
+            <div class="header"><h2>UNIVERSIDAD TECNOLÓGICA DE TECÁMAC</h2><p>Dirección de Servicios Escolares • Campus Tecámac, Edo. Méx.</p></div>
+            <h3>${docType.toUpperCase()}</h3>
+            <p>A QUIEN CORRESPONDA:</p>
+            <p>Por medio de la presente se hace constar que la alumna <strong>SOFÍA MARTÍNEZ LÓPEZ</strong>, con matrícula <strong>2026-0842</strong>, se encuentra inscrita como estudiante regular en el <strong>9° Cuatrimestre</strong> de la carrera de <strong>Ingeniería en Tecnologías de la Información y Comunicación</strong>, con un promedio general acumulado de <strong>${calcGlobalAverage()}</strong>.</p>
+            <div class="seal"><strong>SELLO DIGITAL DE AUTENTICIDAD</strong><br>Folio: ${folio} | Token: ${token} | Fecha de emisión: 15 de noviembre de 2026</div>
+            <script>window.print();<\/script></body></html>
+        `);
         win.document.close();
     }
     showToast(`Documento "${docType}" emitido con folio ${folio}.`, 'success');
@@ -870,33 +903,33 @@ function renderTareas() {
     };
 
     document.getElementById('pendingTasksList').innerHTML = pending.length ? pending.map(t => `
-                <div class="p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-start justify-between gap-3">
-                    <div class="flex items-start gap-3">
-                        <input type="checkbox" onchange="toggleTaskComplete('${t.id}')" class="mt-1 w-4 h-4 rounded accent-brand-600 cursor-pointer">
-                        <div>
-                            <h4 class="text-xs font-bold">${t.titulo}</h4>
-                            <p class="text-[11px] text-slate-500 mt-0.5">${t.materia} • <span class="font-semibold">Entrega: ${t.fecha}</span></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${prioColors[t.prioridad]}">${t.prioridad}</span>
-                        <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
+        <div class="p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+                <input type="checkbox" onchange="toggleTaskComplete('${t.id}')" class="mt-1 w-4 h-4 rounded accent-brand-600 cursor-pointer">
+                <div>
+                    <h4 class="text-xs font-bold">${t.titulo}</h4>
+                    <p class="text-[11px] text-slate-500 mt-0.5">${t.materia} • <span class="font-semibold">Entrega: ${t.fecha}</span></p>
                 </div>
-            `).join('') : '<p class="text-xs text-slate-400 py-4 text-center">No tienes entregas pendientes.</p>';
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${prioColors[t.prioridad]}">${t.prioridad}</span>
+                <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+    `).join('') : '<p class="text-xs text-slate-400 py-4 text-center">No tienes entregas pendientes.</p>';
 
     document.getElementById('completedTasksList').innerHTML = completed.length ? completed.map(t => `
-                <div class="p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-50/30 dark:bg-slate-800/20 flex items-center justify-between gap-3 opacity-75">
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" checked onchange="toggleTaskComplete('${t.id}')" class="w-4 h-4 rounded accent-emerald-600 cursor-pointer">
-                        <div>
-                            <h4 class="text-xs font-semibold line-through">${t.titulo}</h4>
-                            <p class="text-[11px] text-slate-400">${t.materia}</p>
-                        </div>
-                    </div>
-                    <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-rose-600 text-xs"><i class="fa-solid fa-trash"></i></button>
+        <div class="p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-50/30 dark:bg-slate-800/20 flex items-center justify-between gap-3 opacity-75">
+            <div class="flex items-center gap-3">
+                <input type="checkbox" checked onchange="toggleTaskComplete('${t.id}')" class="w-4 h-4 rounded accent-emerald-600 cursor-pointer">
+                <div>
+                    <h4 class="text-xs font-semibold line-through">${t.titulo}</h4>
+                    <p class="text-[11px] text-slate-400">${t.materia}</p>
                 </div>
-            `).join('') : '<p class="text-xs text-slate-400 py-4 text-center">Aún no hay entregas marcadas como completadas.</p>';
+            </div>
+            <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-rose-600 text-xs"><i class="fa-solid fa-trash"></i></button>
+        </div>
+    `).join('') : '<p class="text-xs text-slate-400 py-4 text-center">Aún no hay entregas marcadas como completadas.</p>';
 }
 
 function submitNewTask(e) {
@@ -960,17 +993,19 @@ function changeRefuerzoTopic(topic) {
 
 function renderRefuerzoQuestions() {
     const questions = quizBank[currentQuizTopic] || quizBank.redes;
-    document.getElementById('refuerzoQuestions').innerHTML = questions.map((item, idx) => `
-                <fieldset class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 space-y-2">
-                    <legend class="font-bold text-xs text-slate-800 dark:text-white px-1">${item.q}</legend>
-                    ${item.opts.map((opt, oIdx) => `
-                        <label class="flex items-center gap-2.5 text-xs cursor-pointer py-1">
-                            <input type="radio" name="q${idx}" value="${oIdx}" required class="accent-brand-600">
-                            <span>${opt}</span>
-                        </label>
-                    `).join('')}
-                </fieldset>
-            `).join('');
+    const container = document.getElementById('refuerzoQuestions');
+    if (!container) return;
+    container.innerHTML = questions.map((item, idx) => `
+        <fieldset class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 space-y-2">
+            <legend class="font-bold text-xs text-slate-800 dark:text-white px-1">${item.q}</legend>
+            ${item.opts.map((opt, oIdx) => `
+                <label class="flex items-center gap-2.5 text-xs cursor-pointer py-1">
+                    <input type="radio" name="q${idx}" value="${oIdx}" required class="accent-brand-600">
+                    <span>${opt}</span>
+                </label>
+            `).join('')}
+        </fieldset>
+    `).join('');
 }
 
 function submitRefuerzo(e) {
@@ -994,33 +1029,32 @@ function submitRefuerzo(e) {
 }
 
 function clearRefuerzoResult() {
-    const box = document.getElementById('refuerzoResultBox');
-    if (box) box.classList.add('hidden');
+    document.getElementById('refuerzoResultBox')?.classList.add('hidden');
 }
 
 /* --- 10. HERRAMIENTAS (CALCULADORA GPA + DIRECTORIO) --- */
 function renderHerramientas() {
     const gpaContainer = document.getElementById('gpaInputsContainer');
     gpaContainer.innerHTML = appState.materias.map(m => `
-                <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700">
-                    <span class="text-xs font-semibold truncate">${m.nombre}</span>
-                    <input type="number" step="0.1" min="0" max="10" value="${m.nota}" oninput="recalculateSimulatedGpa()" class="sim-gpa-input w-16 text-xs font-bold text-center rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 py-1">
-                </div>
-            `).join('');
+        <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700">
+            <span class="text-xs font-semibold truncate">${m.nombre}</span>
+            <input type="number" step="0.1" min="0" max="10" value="${m.nota}" oninput="recalculateSimulatedGpa()" class="sim-gpa-input w-16 text-xs font-bold text-center rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 py-1">
+        </div>
+    `).join('');
     recalculateSimulatedGpa();
 
     document.getElementById('profesoresDirectoryGrid').innerHTML = appState.materias.map(m => `
-                <div class="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-1.5">
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md text-white" style="background:${m.color}">${m.codigo}</span>
-                    <h4 class="text-xs font-bold pt-1">${m.profesor}</h4>
-                    <p class="text-[11px] text-slate-500 truncate">${m.nombre}</p>
-                    <div class="pt-2 text-[11px] text-slate-600 dark:text-slate-300 space-y-0.5">
-                        <p><i class="fa-regular fa-envelope mr-1.5 text-brand-500"></i>${m.email}</p>
-                        <p><i class="fa-solid fa-door-open mr-1.5 text-brand-500"></i>${m.cubiculo}</p>
-                        <p><i class="fa-regular fa-clock mr-1.5 text-brand-500"></i>Asesoría: ${m.asesoria}</p>
-                    </div>
-                </div>
-            `).join('');
+        <div class="p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-1.5">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md text-white" style="background:${m.color}">${m.codigo}</span>
+            <h4 class="text-xs font-bold pt-1">${m.profesor}</h4>
+            <p class="text-[11px] text-slate-500 truncate">${m.nombre}</p>
+            <div class="pt-2 text-[11px] text-slate-600 dark:text-slate-300 space-y-0.5">
+                <p><i class="fa-regular fa-envelope mr-1.5 text-brand-500"></i>${m.email}</p>
+                <p><i class="fa-solid fa-door-open mr-1.5 text-brand-500"></i>${m.cubiculo}</p>
+                <p><i class="fa-regular fa-clock mr-1.5 text-brand-500"></i>Asesoría: ${m.asesoria}</p>
+            </div>
+        </div>
+    `).join('');
 }
 
 function recalculateSimulatedGpa() {
@@ -1066,32 +1100,32 @@ function handleGlobalSearch(query) {
 
     box.classList.remove('hidden');
     box.innerHTML = results.length ? results.map(r => `
-                <button onclick="switchTab('${r.tab}'); document.getElementById('globalSearchResults').classList.add('hidden'); document.getElementById('globalSearchInput').value='';" class="w-full text-left p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between gap-2">
-                    <div class="overflow-hidden">
-                        <p class="text-xs font-bold truncate">${r.titulo}</p>
-                        <p class="text-[11px] text-slate-400 truncate">${r.sub}</p>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 shrink-0">${r.tipo}</span>
-                </button>
-            `).join('') : '<p class="text-xs text-slate-400 p-2 text-center">Sin coincidencias en el portal.</p>';
+        <button onclick="switchTab('${r.tab}'); document.getElementById('globalSearchResults').classList.add('hidden'); document.getElementById('globalSearchInput').value='';" class="w-full text-left p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between gap-2">
+            <div class="overflow-hidden">
+                <p class="text-xs font-bold truncate">${r.titulo}</p>
+                <p class="text-[11px] text-slate-400 truncate">${r.sub}</p>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 shrink-0">${r.tipo}</span>
+        </button>
+    `).join('') : '<p class="text-xs text-slate-400 p-2 text-center">Sin coincidencias en el portal.</p>';
 }
 
 function toggleNotifications() {
-    document.getElementById('notifications-menu').classList.toggle('hidden');
+    document.getElementById('notifications-menu')?.classList.toggle('hidden');
 }
 
 function renderNotifications() {
     const unread = appState.notificaciones.some(n => !n.leida);
     document.getElementById('notifDot').classList.toggle('hidden', !unread);
     document.getElementById('notificationsList').innerHTML = appState.notificaciones.map(n => `
-                <div class="p-2.5 rounded-xl ${n.leida ? 'bg-slate-50/50 dark:bg-slate-800/30' : 'bg-brand-50/60 dark:bg-brand-950/40 border border-brand-200/60 dark:border-brand-800/60'}">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold">${n.titulo}</span>
-                        <span class="text-[10px] text-slate-400">${n.tiempo}</span>
-                    </div>
-                    <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">${n.desc}</p>
-                </div>
-            `).join('');
+        <div class="p-2.5 rounded-xl ${n.leida ? 'bg-slate-50/50 dark:bg-slate-800/30' : 'bg-brand-50/60 dark:bg-brand-950/40 border border-brand-200/60 dark:border-brand-800/60'}">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold">${n.titulo}</span>
+                <span class="text-[10px] text-slate-400">${n.tiempo}</span>
+            </div>
+            <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">${n.desc}</p>
+        </div>
+    `).join('');
 }
 
 function clearNotifications() {
@@ -1137,11 +1171,16 @@ function updatePomodoroDisplay() {
     document.getElementById('pomodoroDisplay').textContent = `${mins}:${secs}`;
 }
 
-// Atajo Ctrl + K para el buscador global y cierre de menús al hacer clic fuera
+/* --- ATAJOS DE TECLADO Y EVENTOS GLOBALES --- */
 document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        document.getElementById('globalSearchInput').focus();
+        document.getElementById('globalSearchInput')?.focus();
+    }
+    if (e.key === 'Escape') {
+        ['modalCredencial', 'modalReserva', 'modalUpload', 'modalMateria', 'modalTask'].forEach(closeModal);
+        document.getElementById('globalSearchResults')?.classList.add('hidden');
+        document.getElementById('notifications-menu')?.classList.add('hidden');
     }
 });
 
@@ -1153,7 +1192,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Inicialización
 window.addEventListener('DOMContentLoaded', () => {
     const todayStr = '2026-11-15';
     ['asistenciaDateInput', 'reservaFecha', 'justificanteFecha', 'taskFecha'].forEach(id => {
