@@ -114,83 +114,100 @@
 
             <!-- Menú de Navegación -->
             <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-1" id="navLinks">
-                <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Gestión Académica
-                </div>
+    <div class="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        Gestión Académica
+    </div>
 
-                <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">
-                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
-                    <span>Panel Principal</span>
-                </button>
+    <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+            <span>Panel Principal</span>
+        </div>
+    </button>
 
-                <button onclick="switchTab('materias')" data-tab="materias" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-book-open w-5 text-center"></i>
-                        <span>Mis Materias</span>
-                    </div>
-                    <span id="badgeMaterias" class="text-xs font-semibold bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">6</span>
-                </button>
+    <button onclick="switchTab('materias')" data-tab="materias" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-book-open w-5 text-center"></i>
+            <span>Mis Materias</span>
+        </div>
+        <span id="badgeMaterias" class="text-xs font-semibold bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">6</span>
+    </button>
 
-                <button onclick="switchTab('horario')" data-tab="horario" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    <i class="fa-solid fa-calendar-week w-5 text-center"></i>
-                    <span>Horario Semanal</span>
-                </button>
+    <button onclick="switchTab('horario')" data-tab="horario" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-calendar-week w-5 text-center"></i>
+            <span>Horario Semanal</span>
+        </div>
+    </button>
 
-                <button onclick="switchTab('asistencias')" data-tab="asistencias" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-calendar-check w-5 text-center"></i>
-                        <span>Asistencias</span>
-                    </div>
-                    <span id="badgeAsistenciaAlert" class="hidden w-2 h-2 rounded-full bg-rose-500" title="Materia en riesgo"></span>
-                </button>
+    <button onclick="switchTab('asistencias')" data-tab="asistencias" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-calendar-check w-5 text-center"></i>
+            <span>Asistencias</span>
+        </div>
+        <span id="badgeAsistenciaAlert" class="hidden w-2 h-2 rounded-full bg-rose-500" title="Materia en riesgo"></span>
+    </button>
 
-                <button onclick="switchTab('tareas')" data-tab="tareas" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-list-check w-5 text-center"></i>
-                        <span>Agenda y Entregas</span>
-                    </div>
-                    <span id="badgeTareas" class="text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 px-2 py-0.5 rounded-full">4</span>
-                </button>
+    <button onclick="switchTab('tareas')" data-tab="tareas" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-list-check w-5 text-center"></i>
+            <span>Agenda y Entregas</span>
+        </div>
+        <span id="badgeTareas" class="text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 px-2 py-0.5 rounded-full">3</span>
+    </button>
 
-                <div class="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Campus y Servicios
-                </div>
+    <div class="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        Campus y Servicios
+    </div>
 
-                <button onclick="switchTab('reservas')" data-tab="reservas" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-laptop-code w-5 text-center"></i>
-                        <span>Salones y Equipos</span>
-                    </div>
-                    <span id="badgeReservas" class="text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 px-2 py-0.5 rounded-full">2</span>
-                </button>
+    <button onclick="switchTab('reservas')" data-tab="reservas" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-laptop-code w-5 text-center"></i>
+            <span>Salones y Equipos</span>
+        </div>
+        <span id="badgeReservas" class="text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 px-2 py-0.5 rounded-full">2</span>
+    </button>
 
-                <button onclick="switchTab('archivos')" data-tab="archivos" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-folder-open w-5 text-center"></i>
-                        <span>Nube Académica</span>
-                    </div>
-                    <span id="badgeArchivos" class="text-xs font-semibold bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">8</span>
-                </button>
+    <button onclick="switchTab('archivos')" data-tab="archivos" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-folder-open w-5 text-center"></i>
+            <span>Nube Académica</span>
+        </div>
+        <span id="badgeArchivos" class="text-xs font-semibold bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">8</span>
+    </button>
 
-                <button onclick="switchTab('tramites')" data-tab="tramites" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    <i class="fa-solid fa-file-signature w-5 text-center"></i>
-                    <span>Trámites y Docs</span>
-                </button>
+    <button onclick="switchTab('tramites')" data-tab="tramites" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-file-signature w-5 text-center"></i>
+            <span>Trámites y Docs</span>
+        </div>
+    </button>
 
-                <div class="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Aprendizaje y Soporte
-                </div>
+    <div class="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        Aprendizaje y Soporte
+    </div>
 
-                <button type="button" onclick="switchTab('refuerzo')" data-tab="refuerzo" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    <i class="fa-solid fa-brain w-5 text-center"></i>
-                    <span>Refuerzo Académico</span>
-                </button>
+    <button type="button" onclick="switchTab('refuerzo')" data-tab="refuerzo" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-brain w-5 text-center"></i>
+            <span>Refuerzo Académico</span>
+        </div>
+    </button>
 
-                <button onclick="switchTab('herramientas')" data-tab="herramientas" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
-                    <i class="fa-solid fa-calculator w-5 text-center"></i>
-                    <span>Promedio y Directorio</span>
-                </button>
-            </nav>
+    <button onclick="switchTab('herramientas')" data-tab="herramientas" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-calculator w-5 text-center"></i>
+            <span>Promedio y Directorio</span>
+        </div>
+    </button>
+
+    <button type="button" data-tab="privacidad" onclick="switchTab('privacidad')" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-user-shield w-5 text-center" aria-hidden="true"></i>
+            <span>Privacidad y Datos</span>
+        </div>
+    </button>
+</nav>
 
             <!-- Almacenamiento y Subida Rápida -->
             <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900 shrink-0">

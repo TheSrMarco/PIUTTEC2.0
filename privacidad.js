@@ -10,7 +10,7 @@
 
   try {
     const saved = JSON.parse(localStorage.getItem(CONSENT_KEY));
-    if (saved?.version === VERSION) preferences = saved;
+    if (saved && saved.version === VERSION) preferences = saved;
   } catch {
     // La demostración también funciona si el navegador restringe el almacenamiento.
   }
@@ -31,16 +31,17 @@
 <p class="mt-2">La demo usa datos de ejemplo para mostrar materias, calificaciones, asistencia, archivos, reservas, agenda y refuerzo académico. Los cambios se guardan en este navegador. Utilice solo datos ficticios.</p>
 <p class="mt-2">Puede consultar el aviso integral, cambiar su preferencia para avisos, encuestas y tutorías, o exportar y borrar los datos de la demo.</p>
 `;
+
   const avisoIntegral = `
 <p class="mt-2"><strong>Borrador para la demostración.</strong> Utilice datos de ejemplo en PIUTTEC 2.0. Las finalidades y condiciones de la versión institucional están sujetas a validación por la UTTEC.</p>
 <h3 class="font-bold text-sm mt-4">1. Responsable y contacto</h3>
-<p>Universidad Tecnológica de Tecámac (UTTEC), carretera federal México–Pachuca, km 37.5, predio Sierra Hermosa, C.P. 55740, Tecámac, Estado de México. Teléfono general 55 5938 8400. Correo ARCO de la Unidad de Transparencia: <a class="underline" href="mailto:dpl@uttecamac.edu.mx">dpl@uttecamac.edu.mx</a>.</p>
+<p>Universidad Tecnológica de Tecámac (UTTEC), carretera federal México–Pachuca, km 37.5, predio Sierra Hermosa, C.P. 55740, Tecámac, Estado de México. Teléfono general 55 5938 8400. Correo ARCO de la Unidad de Transparencia: <a class="underline text-brand-600 dark:text-brand-400" href="mailto:dpl@uttecamac.edu.mx">dpl@uttecamac.edu.mx</a>.</p>
 <h3 class="font-bold text-sm mt-4">2. Datos y módulos</h3>
 <p>La demo representa datos de identificación y académicos, calificaciones, horarios, asistencia, reservas, archivos, agenda y directorio docente. El navegador guarda los cambios de la demo. El gestor simula la carga y guarda los datos descriptivos del archivo.</p>
 <h3 class="font-bold text-sm mt-4">3. Datos sensibles</h3>
 <p>Utilice información ficticia para simular justificantes. La versión institucional deberá definir las condiciones para recibir y proteger documentos que contengan datos sensibles.</p>
 <h3 class="font-bold text-sm mt-4">4. Fundamento legal</h3>
-<p>Consulte el <a class="underline" href="https://uttecamac.edomex.gob.mx/sites/uttecamac.edomex.gob.mx/files/files/PDFs/DPL/SLIDERS/AVISO_DE_PRIVACIDAD_UTTEC.pdf" target="_blank" rel="noopener noreferrer">aviso integral publicado por la UTTEC</a>. El fundamento específico de PIUTTEC 2.0 queda pendiente de validación institucional.</p>
+<p>Consulte el <a class="underline text-brand-600 dark:text-brand-400" href="https://uttecamac.edomex.gob.mx/sites/uttecamac.edomex.gob.mx/files/files/PDFs/DPL/SLIDERS/AVISO_DE_PRIVACIDAD_UTTEC.pdf" target="_blank" rel="noopener noreferrer">aviso integral publicado por la UTTEC</a>. El fundamento específico de PIUTTEC 2.0 queda pendiente de validación institucional.</p>
 <h3 class="font-bold text-sm mt-4">5. Finalidades</h3>
 <p><strong>Previstas:</strong> prestar servicios académicos, llevar la asistencia, organizar la agenda, gestionar solicitudes y archivos y apoyar el refuerzo académico.</p>
 <p><strong>Opcionales:</strong> avisos, encuestas y tutorías. La preferencia se guarda en este navegador y puede cambiarse en cualquier momento.</p>
@@ -62,92 +63,113 @@
 
   // ====== 5. INYECTAR VISTA "PRIVACIDAD" ======
   const main = document.querySelector('main');
-  const section = document.createElement('section');
-  section.id = 'view-privacidad';
-  section.className = 'tab-view hidden fade-in space-y-6';
-  section.innerHTML = `
-    <div class="max-w-3xl space-y-6">
-      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700">
-        <h2 class="text-lg font-bold" id="privNoticeTitle" tabindex="-1">Aviso de privacidad integral</h2>
-        <div class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">${avisoIntegral}</div>
-      </div>
-      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 space-y-4">
-        <div>
-          <h2 class="text-lg font-bold">Mis datos y mis derechos</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400" id="privConsentInfo" role="status"></p>
-          <button type="button" id="privRead" class="mt-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold">Marcar aviso como leído</button>
+  if (!main) return;
+
+  if (!document.getElementById('view-privacidad')) {
+    const section = document.createElement('section');
+    section.id = 'view-privacidad';
+    section.className = 'tab-view hidden fade-in space-y-6';
+    section.innerHTML = `
+      <div class="max-w-3xl mx-auto space-y-6">
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700">
+          <h2 class="text-lg font-bold" id="privNoticeTitle" tabindex="-1">Aviso de privacidad integral</h2>
+          <div class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">${avisoIntegral}</div>
         </div>
-        <label class="flex items-start gap-2 text-sm cursor-pointer">
-          <input type="checkbox" id="privAdicionales" class="mt-1 w-4 h-4 accent-indigo-600">
-          <span>Quiero recibir avisos opcionales, encuestas y tutorías cuando estén disponibles.</span>
-        </label>
-        <div class="flex flex-wrap gap-2 text-xs">
-          <button type="button" id="privExport" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold"><i class="fa-solid fa-download mr-1"></i>Exportar datos de la demo</button>
-          <button type="button" id="privDelete" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold"><i class="fa-regular fa-trash-can mr-1"></i>Borrar datos de la demo</button>
-        </div>
-        <hr class="border-slate-200 dark:border-slate-700">
-        <form id="arcoForm" class="space-y-3 text-xs">
-          <h3 class="font-bold text-sm">Solicitud de derechos ARCO</h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><label class="block font-semibold mb-1" for="arcoNombre">Nombre completo</label>
-              <input id="arcoNombre" required class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2"></div>
-            <div><label class="block font-semibold mb-1" for="arcoContacto">Correo para recibir respuesta</label>
-              <input id="arcoContacto" type="email" required class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2"></div>
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 space-y-4">
+          <div>
+            <h2 class="text-lg font-bold">Mis datos y mis derechos</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400" id="privConsentInfo" role="status"></p>
+            <button type="button" id="privRead" class="mt-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold">Marcar aviso como leído</button>
           </div>
-          <div><label class="block font-semibold mb-1" for="arcoDerecho">Derecho que desea ejercer</label>
-            <select id="arcoDerecho" class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2">
-              <option>Acceso</option><option>Rectificación</option><option>Cancelación</option><option>Oposición</option><option>Portabilidad</option>
-            </select></div>
-          <div><label class="block font-semibold mb-1" for="arcoDescripcion">Descripción clara de los datos y de lo que solicita</label>
-            <textarea id="arcoDescripcion" rows="3" required class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2"></textarea></div>
-          <p class="text-slate-500 dark:text-slate-400">Este formulario prepara un borrador en su aplicación de correo. Consulte los requisitos y canales en el aviso institucional.</p>
-          <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold">Abrir borrador de correo</button>
-        </form>
-      </div>
-    </div>`;
-  main.appendChild(section);
+          <label class="flex items-start gap-2 text-sm cursor-pointer">
+            <input type="checkbox" id="privAdicionales" class="mt-1 w-4 h-4 accent-indigo-600">
+            <span>Quiero recibir avisos opcionales, encuestas y tutorías cuando estén disponibles.</span>
+          </label>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <button type="button" id="privExport" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold"><i class="fa-solid fa-download mr-1"></i>Exportar datos de la demo</button>
+            <button type="button" id="privDelete" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold"><i class="fa-regular fa-trash-can mr-1"></i>Borrar datos de la demo</button>
+          </div>
+          <hr class="border-slate-200 dark:border-slate-700">
+          <form id="arcoForm" class="space-y-3 text-xs">
+            <h3 class="font-bold text-sm">Solicitud de derechos ARCO</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><label class="block font-semibold mb-1" for="arcoNombre">Nombre completo</label>
+                <input id="arcoNombre" required class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2"></div>
+              <div><label class="block font-semibold mb-1" for="arcoContacto">Correo para recibir respuesta</label>
+                <input id="arcoContacto" type="email" required class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2"></div>
+            </div>
+            <div><label class="block font-semibold mb-1" for="arcoDerecho">Derecho que desea ejercer</label>
+              <select id="arcoDerecho" class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2">
+                <option>Acceso</option><option>Rectificación</option><option>Cancelación</option><option>Oposición</option><option>Portabilidad</option>
+              </select></div>
+            <div><label class="block font-semibold mb-1" for="arcoDescripcion">Descripción clara de los datos y de lo que solicita</label>
+              <textarea id="arcoDescripcion" rows="3" required class="w-full rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-2"></textarea></div>
+            <p class="text-slate-500 dark:text-slate-400">Este formulario prepara un borrador en su aplicación de correo. Consulte los requisitos y canales en el aviso institucional.</p>
+            <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold">Abrir borrador de correo</button>
+          </form>
+        </div>
+      </div>`;
+    main.appendChild(section);
+  }
 
   // ====== 6. ENTRADA EN MENÚ LATERAL Y ENLACE AL PIE ======
-  const nav = document.getElementById('navLinks');
-  const navBtn = document.createElement('button');
-  navBtn.type = 'button';
-  navBtn.dataset.tab = 'privacidad';
-  navBtn.setAttribute('onclick', "switchTab('privacidad')");
-  navBtn.className = 'nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all';
-  navBtn.innerHTML = '<i class="fa-solid fa-user-shield w-5 text-center" aria-hidden="true"></i><span>Privacidad y Datos</span>';
-  nav.appendChild(navBtn);
+  const navLinks = document.getElementById('navLinks');
+  if (navLinks && !navLinks.querySelector('[data-tab="privacidad"]')) {
+    const navBtn = document.createElement('button');
+    navBtn.type = 'button';
+    navBtn.dataset.tab = 'privacidad';
+    navBtn.className = 'nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all';
+    navBtn.innerHTML = `
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-user-shield w-5 text-center" aria-hidden="true"></i>
+        <span>Privacidad y Datos</span>
+      </div>`;
+    navBtn.onclick = () => {
+      if (typeof switchTab === 'function') switchTab('privacidad');
+    };
+    navLinks.appendChild(navBtn);
+  }
 
-  const footerLink = document.createElement('button');
-  footerLink.type = 'button';
-  footerLink.className = 'w-full text-center text-[11px] text-slate-500 dark:text-slate-400 hover:underline py-2';
-  footerLink.textContent = 'Aviso de privacidad';
-  footerLink.onclick = () => switchTab('privacidad');
-  document.getElementById('sidebar').appendChild(footerLink);
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar && !sidebar.querySelector('[data-privacy-footer]')) {
+    const footerLink = document.createElement('button');
+    footerLink.type = 'button';
+    footerLink.dataset.privacyFooter = 'true';
+    footerLink.className = 'w-full text-center text-[11px] text-slate-500 dark:text-slate-400 hover:underline py-2';
+    footerLink.textContent = 'Aviso de privacidad';
+    footerLink.onclick = () => {
+      if (typeof switchTab === 'function') switchTab('privacidad');
+    };
+    sidebar.appendChild(footerLink);
+  }
 
-  if (typeof tabTitles !== 'undefined') tabTitles.privacidad = 'Privacidad y Protección de Datos Personales';
+  if (typeof tabTitles !== 'undefined') {
+    tabTitles.privacidad = 'Privacidad y Protección de Datos Personales';
+  }
 
   // ====== 7. MODAL DE AVISO SIMPLIFICADO (CONSENTIMIENTO) ======
-  const modal = document.createElement('dialog');
-  modal.id = 'modalPrivacidad';
-  modal.className = 'm-auto w-[calc(100%_-_2rem)] max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-6 shadow-xl backdrop:bg-slate-900/70';
-  modal.setAttribute('role', 'dialog');
-  modal.setAttribute('aria-modal', 'true');
-  modal.setAttribute('aria-labelledby', 'privModalTitle');
-  modal.innerHTML = `
-    <div>
-      <h3 id="privModalTitle" class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-user-shield text-brand-600"></i> Aviso de privacidad simplificado</h3>
-      <div class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed mt-3">${avisoSimplificado}</div>
-      <label class="flex items-start gap-2 text-xs mt-4 cursor-pointer">
-        <input type="checkbox" id="privModalAdic" class="mt-0.5 w-4 h-4 accent-indigo-600">
-        <span>Quiero recibir avisos opcionales, encuestas y tutorías cuando estén disponibles.</span>
-      </label>
-      <div class="flex flex-wrap justify-end gap-2 pt-4 text-xs">
-        <button type="button" id="privModalLeer" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-medium">Leer aviso integral</button>
-        <button type="button" id="privModalOk" autofocus class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold">He leído el aviso y continuar</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-
+  let modal = document.getElementById('modalPrivacidad');
+  if (!modal) {
+    modal = document.createElement('dialog');
+    modal.id = 'modalPrivacidad';
+    modal.className = 'm-auto w-[calc(100%_-_2rem)] max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-6 shadow-xl backdrop:bg-slate-900/70';
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'privModalTitle');
+    modal.innerHTML = `
+      <div>
+        <h3 id="privModalTitle" class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-user-shield text-brand-600"></i> Aviso de privacidad simplificado</h3>
+        <div class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed mt-3">${avisoSimplificado}</div>
+        <label class="flex items-start gap-2 text-xs mt-4 cursor-pointer">
+          <input type="checkbox" id="privModalAdic" class="mt-0.5 w-4 h-4 accent-indigo-600">
+          <span>Quiero recibir avisos opcionales, encuestas y tutorías cuando estén disponibles.</span>
+        </label>
+        <div class="flex flex-wrap justify-end gap-2 pt-4 text-xs">
+          <button type="button" id="privModalLeer" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-medium">Leer aviso integral</button>
+          <button type="button" id="privModalOk" autofocus class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold">He leído el aviso y continuar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
 
   const additional = document.getElementById('privAdicionales');
   const modalAdditional = document.getElementById('privModalAdic');
@@ -174,13 +196,13 @@
 
   document.getElementById('privModalLeer').onclick = () => {
     modal.close();
-    switchTab('privacidad');
-    document.getElementById('privNoticeTitle').focus();
+    if (typeof switchTab === 'function') switchTab('privacidad');
+    document.getElementById('privNoticeTitle')?.focus();
   };
 
   readButton.onclick = () => {
     savePreferences({ fecha: new Date().toISOString() });
-    document.getElementById('privNoticeTitle').focus();
+    document.getElementById('privNoticeTitle')?.focus();
   };
 
   additional.onchange = () => {
@@ -188,7 +210,11 @@
   };
 
   document.getElementById('privExport').onclick = () => {
-    const data = { exportado: new Date().toISOString(), preferencias: preferences, datos: appState };
+    const data = {
+      exportado: new Date().toISOString(),
+      preferencias: preferences,
+      datos: typeof appState !== 'undefined' ? appState : {}
+    };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -196,16 +222,20 @@
     link.download = 'mis_datos_piuttec.json';
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast('Exportación de la demo preparada', 'success');
+    if (typeof showToast === 'function') {
+      showToast('Exportación de la demo preparada', 'success');
+    }
   };
 
   document.getElementById('privDelete').onclick = () => {
     if (!confirm('¿Borrar los cambios guardados en la demo y restablecer el aviso en este navegador?')) return;
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      if (typeof STORAGE_KEY !== 'undefined') localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(CONSENT_KEY);
     } catch {
-      showToast('El navegador impidió borrar los datos locales', 'error');
+      if (typeof showToast === 'function') {
+        showToast('El navegador impidió borrar los datos locales', 'error');
+      }
       return;
     }
     location.reload();
@@ -227,5 +257,7 @@
   };
 
   refreshConsentInfo();
-  if (!readButton.hidden) modal.showModal();
+  if (!readButton.hidden && typeof modal.showModal === 'function') {
+    modal.showModal();
+  }
 })();
