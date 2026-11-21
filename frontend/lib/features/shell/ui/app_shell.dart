@@ -4,6 +4,7 @@ import '../../dashboard/ui/dashboard_view.dart';
 import '../../privacy/ui/privacy_notice_view.dart';
 import '../../refuerzo/ui/refuerzo_quiz_view.dart';
 import '../../learning/ui/learning_graph_view.dart';
+import '../../preview/ui/academic_preview_views.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -16,14 +17,18 @@ class _AppShellState extends State<AppShell> {
   int _selected = 0;
   static const _sections = [
     ('Panel Principal', Icons.dashboard_outlined, DashboardView()),
-    ('Mis Materias', Icons.menu_book_outlined, null),
-    ('Control de Asistencias', Icons.event_available_outlined, null),
-    ('Gestor de Archivos', Icons.folder_open_outlined, null),
-    ('Salones y Equipos', Icons.computer_outlined, null),
-    ('Agenda y Tareas', Icons.checklist_outlined, null),
+    ('Mis Materias', Icons.menu_book_outlined, SubjectsPreview()),
+    (
+      'Control de Asistencias',
+      Icons.event_available_outlined,
+      AttendancePreview(),
+    ),
+    ('Gestor de Archivos', Icons.folder_open_outlined, FilesPreview()),
+    ('Salones y Equipos', Icons.computer_outlined, ResourcesPreview()),
+    ('Agenda y Tareas', Icons.checklist_outlined, AgendaPreview()),
     ('Refuerzo Académico', Icons.psychology_outlined, RefuerzoQuizView()),
     ('Mi Neurona UTTEC', Icons.hub_outlined, LearningGraphView()),
-    ('Directorio y Promedio', Icons.calculate_outlined, null),
+    ('Directorio y Promedio', Icons.calculate_outlined, DirectoryPreview()),
     ('Aviso de privacidad', Icons.privacy_tip_outlined, PrivacyNoticeView()),
   ];
 
@@ -33,17 +38,29 @@ class _AppShellState extends State<AppShell> {
     final navigation = SafeArea(
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(24),
+          Padding(
+            padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                Icon(Icons.school, size: 36),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset(
+                    'assets/images/piuttec-ii-logo.png',
+                    height: 52,
+                    fit: BoxFit.contain,
+                    semanticLabel: 'Logo PIUTTEC II',
+                  ),
+                ),
                 SizedBox(height: 8),
                 Text(
                   'PIUTTEC 2.0',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
-                Text('Desarrollo local'),
+                Text('Demostración'),
               ],
             ),
           ),
@@ -75,31 +92,7 @@ class _AppShellState extends State<AppShell> {
           Expanded(
             child: IndexedStack(
               index: _selected,
-              children: [
-                for (final (title, icon, page) in _sections)
-                  page ??
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(icon, size: 48),
-                              const SizedBox(height: 16),
-                              Text(
-                                title,
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'En desarrollo',
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-              ],
+              children: [for (final section in _sections) section.$3],
             ),
           ),
         ],

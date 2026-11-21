@@ -88,3 +88,14 @@ Cuaderno con 12 temas de Redes digitales, Programación, Matemáticas e Intelige
 Disponible en el menú de Flutter o en /#/neurona. Los apuntes y la autoevaluación se conservan al navegar dentro del módulo y se reinician al salir o recargar. Son datos de prueba sin persistencia por alumno ni acreditación de dominio. La demo HTML se conserva.
 
 Verificación: flutter analyze y flutter test.
+
+## Vistas previas de los módulos académicos
+
+El menú de Flutter incluye vistas de Mis Materias, Control de Asistencias,
+Gestor de Archivos, Salones y Equipos, Agenda y Tareas y Directorio y Promedio.
+Muestran datos de ejemplo, horarios, calificaciones, comparación grupal,
+justificantes y seguimiento de reservas y préstamos. Las acciones de edición,
+envío, carga y reserva están deshabilitadas y señaladas como futuras.
+Estas vistas no consultan ni modifican registros académicos reales. La implementación
+operativa de sesión y asistencias sigue en la rama feature/sesion-asistencias.
+El prototipo HTML se conserva sin cambios.
