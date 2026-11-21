@@ -80,3 +80,11 @@ flutter build web
 - Francisco Hernandez Antonio
 
 Este es un documento para buenas practicas
+
+## Mi Neurona UTTEC (prueba Flutter)
+
+Cuaderno con 12 temas de Redes digitales, Programación, Matemáticas e Inteligencia Artificial. Cada tema incluye explicación, ejemplo, enlaces a otros temas, apuntes personales y autoevaluación. La vista de mapa permite abrir temas conectados entre materias; en móvil hay un selector de temas. Incluye el logo del proyecto.
+
+Disponible en el menú de Flutter o en /#/neurona. Los apuntes y la autoevaluación se conservan al navegar dentro del módulo y se reinician al salir o recargar. Son datos de prueba sin persistencia por alumno ni acreditación de dominio. La demo HTML se conserva.
+
+Verificación: flutter analyze y flutter test.

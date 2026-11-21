@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../dashboard/ui/dashboard_view.dart';
 import '../../privacy/ui/privacy_notice_view.dart';
 import '../../refuerzo/ui/refuerzo_quiz_view.dart';
+import '../../learning/ui/learning_graph_view.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -21,6 +22,7 @@ class _AppShellState extends State<AppShell> {
     ('Salones y Equipos', Icons.computer_outlined, null),
     ('Agenda y Tareas', Icons.checklist_outlined, null),
     ('Refuerzo Académico', Icons.psychology_outlined, RefuerzoQuizView()),
+    ('Mi Neurona UTTEC', Icons.hub_outlined, LearningGraphView()),
     ('Directorio y Promedio', Icons.calculate_outlined, null),
     ('Aviso de privacidad', Icons.privacy_tip_outlined, PrivacyNoticeView()),
   ];

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/ui/registration_preview.dart';
 import 'features/shell/ui/app_shell.dart';
+import 'features/learning/ui/learning_graph_view.dart';
 
 class PiuttecApp extends StatelessWidget {
   const PiuttecApp({super.key});
@@ -14,6 +15,12 @@ class PiuttecApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      routes: {
+        '/neurona': (_) => Scaffold(
+          appBar: AppBar(title: const Text('Mi Neurona UTTEC')),
+          body: const LearningGraphView(),
+        ),
+      },
       home: const _DemoEntryGate(),
     );
   }
