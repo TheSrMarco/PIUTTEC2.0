@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 
 import '../../dashboard/ui/dashboard_view.dart';
+import '../../auth/data/session_controller.dart';
+import '../../attendance/ui/attendance_view.dart';
 import '../../privacy/ui/privacy_notice_view.dart';
 import '../../refuerzo/ui/refuerzo_quiz_view.dart';
 
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  const AppShell({
+    required this.session,
+    required this.onLogin,
+    required this.onLogout,
+    super.key,
+  });
+
+  final SessionController session;
+  final VoidCallback onLogin;
+  final VoidCallback onLogout;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -13,16 +24,28 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _selected = 0;
-  static const _sections = [
-    ('Panel Principal', Icons.dashboard_outlined, DashboardView()),
+  List<(String, IconData, Widget?)> get _sections => [
+    ('Panel Principal', Icons.dashboard_outlined, const DashboardView()),
     ('Mis Materias', Icons.menu_book_outlined, null),
-    ('Control de Asistencias', Icons.event_available_outlined, null),
+    (
+      'Control de Asistencias',
+      Icons.event_available_outlined,
+      AttendanceView(
+        api: widget.session.api,
+        authenticated: widget.session.user != null,
+        onSignIn: widget.onLogin,
+      ),
+    ),
     ('Gestor de Archivos', Icons.folder_open_outlined, null),
     ('Salones y Equipos', Icons.computer_outlined, null),
     ('Agenda y Tareas', Icons.checklist_outlined, null),
-    ('Refuerzo Académico', Icons.psychology_outlined, RefuerzoQuizView()),
+    ('Refuerzo Académico', Icons.psychology_outlined, const RefuerzoQuizView()),
     ('Directorio y Promedio', Icons.calculate_outlined, null),
-    ('Aviso de privacidad', Icons.privacy_tip_outlined, PrivacyNoticeView()),
+    (
+      'Aviso de privacidad',
+      Icons.privacy_tip_outlined,
+      const PrivacyNoticeView(),
+    ),
   ];
 
   @override
@@ -42,6 +65,27 @@ class _AppShellState extends State<AppShell> {
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 Text('Desarrollo local'),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                if (widget.session.user case final user?) Text(user.name),
+                TextButton.icon(
+                  onPressed: widget.session.user == null
+                      ? widget.onLogin
+                      : widget.onLogout,
+                  icon: Icon(
+                    widget.session.user == null ? Icons.login : Icons.logout,
+                  ),
+                  label: Text(
+                    widget.session.user == null
+                        ? 'Iniciar sesión'
+                        : 'Cerrar sesión',
+                  ),
+                ),
               ],
             ),
           ),

@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 import '../../privacy/ui/privacy_notice_view.dart';
 
 class RegistrationPreview extends StatefulWidget {
-  const RegistrationPreview({required this.onContinue, super.key});
+  const RegistrationPreview({
+    required this.onContinue,
+    this.onLogin,
+    super.key,
+  });
 
   final VoidCallback onContinue;
+  final VoidCallback? onLogin;
 
   @override
   State<RegistrationPreview> createState() => _RegistrationPreviewState();
@@ -46,6 +51,11 @@ class _RegistrationPreviewState extends State<RegistrationPreview> {
       appBar: AppBar(
         title: const Text('PIUTTEC 2.0'),
         actions: [
+          if (widget.onLogin != null)
+            TextButton(
+              onPressed: widget.onLogin,
+              child: const Text('Iniciar sesión'),
+            ),
           TextButton.icon(
             onPressed: widget.onContinue,
             icon: const Icon(Icons.visibility_outlined),

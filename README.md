@@ -33,7 +33,7 @@ La arquitectura prevista usa **Flutter y Dart** para web, Android e iOS, **Djang
 
 La demo HTML se abre como antes desde la raíz. La base de la aplicación está en frontend/ y la API en backend/.
 
-La API incluye autenticación JWT con usuario y contraseña, renovación del token, un usuario con campo de rol institucional y un panel de demostración disponible durante el desarrollo. La interfaz inicial incluye el panel y la navegación adaptable. La pantalla de inicio de sesión, la autorización específica de cada módulo y sus operaciones se desarrollarán en las siguientes iteraciones.
+La aplicación Flutter incluye inicio y cierre de sesión, renovación automática del token y un pase de lista conectado a Django. Cada docente puede editar sus materias y cada estudiante puede consultar sus propios registros. El panel principal continúa utilizando sus datos de demostración. El registro inicial sigue siendo una pantalla de prueba.
 
 ### Servidor en Windows
 
@@ -48,7 +48,23 @@ Copy-Item .env.example .env
 
 El entorno usa SQLite de forma predeterminada para iniciar el desarrollo. Para usar PostgreSQL, crea una base y configura DB_ENGINE=postgres y las variables PG* en backend/.env antes de ejecutar las migraciones. Configura una DJANGO_SECRET_KEY estable en ese archivo si vas a trabajar con sesiones entre reinicios. El archivo .env y la base local quedan excluidos de Git.
 
-Para crear una cuenta local usa .venv/Scripts/python.exe manage.py createsuperuser. El administrador de Django está en http://127.0.0.1:8000/admin/. Los roles institucionales se asignan allí, mientras que los permisos específicos de negocio se incorporarán al implementar los módulos.
+Para crear una cuenta de administración usa .venv/Scripts/python.exe manage.py createsuperuser. Desde http://127.0.0.1:8000/admin/ puedes crear usuarios con rol de docente o estudiante, crear materias con grupo y periodo y asignar sus inscripciones.
+
+### Probar las asistencias
+
+Desde backend/ y con DJANGO_DEBUG=1 ejecuta:
+
+~~~powershell
+.venv/Scripts/python.exe manage.py create_demo_data
+~~~
+
+El comando pide una contraseña para las cuentas nuevas y crea docente.demo, alumno.demo y alumno2.demo, además de la materia ficticia Fundamentos de redes. Puede repetirse conservando las contraseñas y los registros existentes. La variable de entorno PIUTTEC_DEMO_PASSWORD permite ejecutar el comando de forma no interactiva.
+
+En Flutter elige **Iniciar sesión**. Como docente.demo, abre **Control de Asistencias**, selecciona materia y fecha, registra presente, retardo, falta o justificado y pulsa **Guardar asistencias**. Puedes añadir una observación y una hora opcional. **Marcar pendientes como presentes** completa solo los estudiantes sin registrar. Guarda o descarta los cambios antes de seleccionar otra fecha o materia.
+
+Con alumno.demo podrás consultar únicamente su propio registro. El servidor protege también estas restricciones. Las asistencias se guardan por inscripción y fecha en la base configurada. Si otra persona modificó la misma lista, se muestra el conflicto y se puede recargar antes de guardar. Las sesiones permanecen en memoria durante la ejecución de Flutter y la API renueva el token de acceso automáticamente cuando corresponde.
+
+Este primer pase de lista es diario. La vista mensual y los reportes del ZIP AssistList quedan como referencia para una siguiente iteración.
 
 ### Aplicación en otra terminal
 
@@ -58,16 +74,18 @@ flutter pub get
 flutter run -d chrome --web-port 5173
 ~~~
 
-El panel consulta http://127.0.0.1:8000/api/demo/dashboard/. Esta ruta entrega exclusivamente datos de ejemplo del HTML y se habilita con DJANGO_DEBUG=1. La API de autenticación está en /api/auth/login/ y /api/auth/refresh/. Las rutas futuras requieren autenticación por defecto.
+El panel consulta http://127.0.0.1:8000/api/demo/dashboard/. Esta ruta entrega exclusivamente datos de ejemplo del HTML y se habilita con DJANGO_DEBUG=1. La API de autenticación está en /api/auth/login/, /api/auth/refresh/ y /api/auth/me/. El listado de materias está en /api/courses/ y el pase de lista en /api/courses/<id>/attendance/. Estas rutas académicas requieren autenticación.
 
 ### Verificación
 
 ~~~powershell
 cd backend
 .venv/Scripts/python.exe manage.py check
+.venv/Scripts/python.exe manage.py test attendance
 .venv/Scripts/python.exe manage.py makemigrations --check --dry-run
 cd ../frontend
 flutter analyze
+flutter test
 flutter build web
 ~~~
 
