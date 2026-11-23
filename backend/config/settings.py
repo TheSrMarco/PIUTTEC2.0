@@ -21,6 +21,7 @@ INSTALLED_APPS = [
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -71,8 +72,17 @@ LANGUAGE_CODE = "es-mx"
 TIME_ZONE = "America/Mexico_City"
 USE_I18N = True
 USE_TZ = True
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
@@ -84,13 +94,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
 }
 
-# Los documentos se guardan fuera del directorio público static/web y requieren JWT.
+# Los documentos se guardan fuera del directorio pÃºblico static/web y requieren JWT.
 PRIVATE_MEDIA_ROOT = BASE_DIR / 'private_uploads'
 MEDIA_ROOT = PRIVATE_MEDIA_ROOT
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 11 * 1024 * 1024
 
-# Rate limiting básico de API. En producción se recomienda caché compartida (Redis).
+# Rate limiting bÃ¡sico de API. En producciÃ³n se recomienda cachÃ© compartida (Redis).
 REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = [
     "rest_framework.throttling.AnonRateThrottle",
     "rest_framework.throttling.UserRateThrottle",
@@ -99,6 +109,7 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {"anon": "60/hour", "user": "600/hour
 
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 if not DEBUG:
@@ -107,8 +118,8 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 
 
-# Tokens JWT: rotación de refresh; logout con blacklist. Un cambio de contraseña
-# invalida JWT previos al verificar la huella de la contraseña en el claim.
+# Tokens JWT: rotaciÃ³n de refresh; logout con blacklist. Un cambio de contraseÃ±a
+# invalida JWT previos al verificar la huella de la contraseÃ±a en el claim.
 from datetime import timedelta
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
