@@ -7,10 +7,10 @@ const STORAGE_KEY = 'piuttec_v2_state_2026';
 const defaultState = {
     darkMode: null, // null = detecta preferencia del sistema operativo automáticamente
     materias: [
-        { id: 'm1', codigo: 'TICS-901', nombre: 'Bases de Datos Distribuidas', profesor: 'MTI Jesús E. Romero', email: 'j.romero@uttec.edu.mx', cubiculo: 'Edif. D - Cub. 12', asesoria: 'Mar y Jue 14:00-15:00', salon: 'Lab Cómputo 2', horario: 'Lun y Mié 15:00 - 17:00', nota: 9.5, grupal: 8.2, p: 18, r: 1, j: 0, f: 1, color: '#4f46e5' },
+        { id: 'm1', codigo: 'TICS-901', nombre: 'Bases de Datos Distribuidas', profesor: 'MTI Jesús E. Romero', email: 'j.romero@uttec.edu.mx', cubiculo: 'Edif. D - Cub. 12', asesoria: 'Mar y Jue 14:00-15:00', salon: 'Lab Cómputo 2', horario: 'Lun y Mié 15:00 - 17:00', nota: 9.5, grupal: 8.2, p: 18, r: 1, j: 0, f: 1, color: '#0fa958' },
         { id: 'm2', codigo: 'TICS-902', nombre: 'Extracción y Visualización de Datos', profesor: 'Dra. Elena Ríos', email: 'e.rios@uttec.edu.mx', cubiculo: 'Edif. D - Cub. 04', asesoria: 'Lun y Mié 17:00-18:00', salon: 'Lab Big Data A-102', horario: 'Mar y Jue 15:00 - 17:00', nota: 9.8, grupal: 8.5, p: 20, r: 0, j: 0, f: 0, color: '#0ea5e9' },
         { id: 'm3', codigo: 'TICS-903', nombre: 'Seguridad en Redes y Criptografía', profesor: 'Ing. Carlos Mendoza', email: 'c.mendoza@uttec.edu.mx', cubiculo: 'Edif. B - Cub. 08', asesoria: 'Vie 15:00-16:30', salon: 'Lab Redes B-204', horario: 'Lun y Mié 17:00 - 19:00', nota: 8.7, grupal: 7.9, p: 15, r: 2, j: 1, f: 2, color: '#10b981' },
-        { id: 'm4', codigo: 'TICS-904', nombre: 'Desarrollo Web Fullstack', profesor: 'Mtra. Laura Sánchez', email: 'l.sanchez@uttec.edu.mx', cubiculo: 'Edif. D - Cub. 09', asesoria: 'Mar 17:00-18:30', salon: 'Aula Audiovisual 3', horario: 'Mar y Jue 17:00 - 19:00', nota: 9.2, grupal: 8.4, p: 19, r: 0, j: 0, f: 1, color: '#8b5cf6' },
+        { id: 'm4', codigo: 'TICS-904', nombre: 'Desarrollo Web Fullstack', profesor: 'Mtra. Laura Sánchez', email: 'l.sanchez@uttec.edu.mx', cubiculo: 'Edif. D - Cub. 09', asesoria: 'Mar 17:00-18:30', salon: 'Aula Audiovisual 3', horario: 'Mar y Jue 17:00 - 19:00', nota: 9.2, grupal: 8.4, p: 19, r: 0, j: 0, f: 1, color: '#008B76' },
         { id: 'm5', codigo: 'TICS-905', nombre: 'Gestión de Proyectos de TI (Scrum)', profesor: 'Dr. Roberto Méndez', email: 'r.mendez@uttec.edu.mx', cubiculo: 'Edif. C - Cub. 02', asesoria: 'Jue 19:00-20:00', salon: 'Aula C-105', horario: 'Lun y Mié 19:00 - 21:00', nota: 8.9, grupal: 8.6, p: 17, r: 1, j: 0, f: 2, color: '#f59e0b' },
         { id: 'm6', codigo: 'TICS-906', nombre: 'Inglés Técnico VIII', profesor: 'Lic. Patricia Ortega', email: 'p.ortega@uttec.edu.mx', cubiculo: 'Centro de Idiomas', asesoria: 'Vie 17:00-18:00', salon: 'Lab Idiomas 1', horario: 'Vie 16:00 - 19:00', nota: 8.5, grupal: 8.0, p: 14, r: 1, j: 0, f: 3, color: '#ec4899' }
     ],
@@ -378,7 +378,7 @@ function updateGradesChart() {
                 {
                     label: 'Tu Calificación',
                     data: appState.materias.map(m => m.nota),
-                    backgroundColor: isDark ? '#6366f1' : '#4f46e5',
+                    backgroundColor: isDark ? '#47c98a' : '#087c49',
                     borderRadius: 8,
                     barPercentage: 0.55
                 },
@@ -464,7 +464,7 @@ function updateMateriaGrade(id, newVal) {
 
 function submitNewMateria(e) {
     e.preventDefault();
-    const colors = ['#4f46e5', '#0ea5e9', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
+    const colors = ['#087c49', '#0fa958', '#47c98a', '#008b76', '#d39a34', '#377e76'];
     const nueva = {
         id: 'm' + Date.now(),
         codigo: document.getElementById('matCodigo').value.trim().toUpperCase(),

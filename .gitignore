@@ -6,3 +6,20 @@
 *.sqlite3
 *.sqlite3-journal
 backend/staticfiles/
+evidencias_pruebas/
+
+# Documentos de práctica: nunca incluir archivos privados en Git.
+backend/private_uploads/
+
+.env.production
+**/.dart_tool/
+**/build/
+**/.gradle/
+**/.venv/
+**/.env
+**/.env.*
+!**/.env.example
+**/*.sqlite3
+**/private_uploads/
+**/media/
+evidencias_pruebas/

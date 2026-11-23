@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PIUTTEC 2.0 · Prototipo de acceso y calendario</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#1b2736;background:#111820}
+*{box-sizing:border-box}button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.47}
+.login{min-height:100vh;color:#f0f4f8;background:radial-gradient(circle at 38% 36%,#143d35 0,#111b20 46%,#0f151b 95%);display:flex;flex-direction:column;padding:18px max(4vw,18px);position:relative;overflow:hidden}
+.login.light{background:radial-gradient(circle at 38% 36%,#17483b 0,#1c2b2b 45%,#111b20 96%)}
+.brand{display:flex;align-items:center;gap:16px;font-weight:800;font-size:clamp(18px,2.3vw,26px);letter-spacing:-.04em}
+.brandLogo{display:inline-flex;position:relative;width:255px;min-height:80px;align-items:center;justify-content:center;background:#fff;border-radius:12px;padding:8px}.brand-img{display:block;position:relative;z-index:1;width:240px;height:66px;object-fit:contain}.logo-text{font-size:26px;font-weight:900;color:#006c50;display:flex;position:absolute;inset:0;align-items:center;justify-content:center}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;z-index:1}
+.demo-top{border:1px solid #96abc7;border-radius:12px;background:#ffffff0d;color:white;padding:11px 15px}
+.hero{width:min(1080px,100%);margin:auto;display:grid;grid-template-columns:minmax(250px,440px) minmax(310px,460px);gap:clamp(15px,6vw,70px);align-items:center;justify-content:center;position:relative;z-index:1}
+.lampWrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:440px;position:relative}
+.lampGlow{position:absolute;inset:-55px;pointer-events:none;border-radius:50%;background:radial-gradient(circle,#3ce39c60 0%,#16bd7830 32%,transparent 67%);opacity:0;transition:opacity .45s}
+.light .lampGlow{opacity:1}
+#lamp-svg{width:min(320px,85%);height:390px;overflow:visible;filter:drop-shadow(0 16px 24px #0005)}
+#shade{fill:#ede7dd;transition:fill .4s,filter .4s}.light #shade{fill:#f0fff6;filter:drop-shadow(0 0 22px #36db95bf)}
+#lampCord{stroke:#8faea0;stroke-width:2.1}#lampBead{fill:#6bd4a3}
+#pullSurface{touch-action:none;cursor:grab}#pullSurface:active{cursor:grabbing}#pullSurface:focus-visible{outline:4px solid #85e8b4}
+.instruction{font-size:15px;color:#c4d0dc;text-align:center;margin-top:-20px}
+.formWrap{background:#1f2d37ec;border:1px solid #3f8d6850;backdrop-filter:blur(16px);border-radius:24px;padding:28px;box-shadow:0 25px 55px #0005;transform:translateY(22px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .42s,transform .42s,visibility .42s}
+.light .formWrap{opacity:1;transform:none;visibility:visible;pointer-events:auto}
+h1{margin:0 0 6px;font-size:clamp(24px,3vw,32px)}.sub{color:#b4c4d5;margin:0 0 22px;font-size:14px}
+label{display:block;margin:14px 0 6px;color:#d2dde6;font-size:14px}.formWrap input{width:100%;background:#203749;border:1px solid #496c67;border-radius:12px;padding:13px 15px;color:white;outline-offset:2px}.formWrap input:focus{outline:2px solid #21c584}
+.primary{width:100%;margin-top:20px;border:0;border-radius:12px;padding:14px 18px;background:#0fa958;color:#fff;font-weight:800;transition:background .15s}.primary:hover{background:#0b8748}.primary:focus-visible{outline:3px solid #8af0bb;outline-offset:2px}.secondary{width:100%;margin-top:10px;border-radius:12px;padding:12px 16px;background:transparent;border:1px solid #38ac7c;color:#91e9b8}.secondary:hover{background:#0da66b22}
+.disclaimer{margin-top:24px;color:#92a4b6;font-size:12px;text-align:center}
+.app{min-height:100vh;background:#f4f6f7;display:none}.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{background:linear-gradient(160deg,#0b9a63,#006445 54%,#003944);color:white;padding:20px 16px;display:flex;flex-direction:column}
+.sidebar .brand-img{height:68px;width:225px;margin-bottom:0}.sidebar h3{margin:22px 10px 8px;color:#e5fff3;font-size:14px;text-transform:uppercase;letter-spacing:.07em}
+details{border-bottom:1px solid #ffffff2b;padding:4px 0}summary{cursor:pointer;padding:12px 10px;font-weight:700;font-size:15px}summary:hover{background:#ffffff10;border-radius:8px}.nav-link{background:transparent;border:none;display:block;color:#ecfff7;text-align:left;width:100%;padding:10px 18px;border-radius:8px;font-size:14px}.nav-link:hover,.nav-link.selected{background:#ffffff24}.signout{margin-top:auto;color:white;background:transparent;border:1px solid #c9e6dc80;padding:12px;border-radius:10px}
+.main{min-width:0}.head{padding:19px 27px;background:white;border-bottom:1px solid #e3e7ec;display:flex;justify-content:space-between;gap:10px;align-items:center}.head h2{margin:0;font-size:19px}.chip{font-size:12px;padding:6px 11px;border-radius:18px;background:#f0e6bf;color:#574110}.content{padding:24px;max-width:1300px;margin:0 auto}
+.card{background:#fff;border:1px solid #e4e8eb;border-radius:16px;box-shadow:0 4px 14px #162c3710;padding:18px}.calendarHead{display:flex;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-bottom:16px}.calendarHead button{background:#173345;border:0;color:white;border-radius:7px;padding:9px 11px}.calendarHead strong{font-size:23px;text-transform:lowercase}.calendarHead .active{background:#078359}.weekdays,.calendarGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}.weekdays span{text-align:center;color:#2a7293;font-weight:bold;border-bottom:1px solid #e4e7ed;padding:8px}.day{min-height:95px;background:#fff;border:1px solid #e4e8ed;margin:-.5px;padding:7px;text-align:right;color:#245b9e}.day.muted{color:#c1c7cc}.day.today{box-shadow:inset 0 0 0 3px #078359}.day:focus{outline:2px solid #078359}.event{display:block;text-align:left;color:#00694e;font-size:10px;background:#e1f7ec;border-radius:4px;padding:3px;margin-top:6px}.emptyPanel{padding:40px 22px;text-align:center;color:#526477}
+.gate{display:none;position:fixed;inset:0;background:#061322c9;z-index:20;align-items:center;justify-content:center;padding:14px}.gate.active{display:flex}.modal{width:min(680px,100%);max-height:90vh;overflow:auto;background:white;border-radius:14px;box-shadow:0 22px 60px #0007;color:#1c2736;padding:26px}.modal h2{margin:0 0 16px;font-size:23px}.modal a,.modal button.link{color:#146ca6;background:none;border:0;padding:0;text-decoration:underline;font:inherit;cursor:pointer}.confirm{display:flex;align-items:flex-start;gap:12px;padding:17px 0}.confirm input{accent-color:#048156;margin-top:4px;width:20px;height:20px}.modalActions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}.modalActions button{border:none;border-radius:9px;padding:11px 15px;font-weight:700}.modalActions .go{background:#047f5e;color:white}.modalActions .back{background:#e9edf0;color:#344451}.noticeText{display:none;font-size:14px;line-height:1.6;padding:13px;background:#f5f8fa;border:1px solid #e2e9ef;border-radius:10px;max-height:210px;overflow:auto;margin:12px 0}
+@media(max-width:760px){.hero{grid-template-columns:1fr;gap:0;padding:10px}.lampWrap{min-height:345px}#lamp-svg{height:325px}.formWrap{margin:0 auto 30px;max-width:440px;width:100%}.layout{display:block}.sidebar{min-height:initial}.content{padding:12px}.head{padding:16px}.day{min-height:60px;font-size:12px}.event{font-size:8px;padding:2px}}
+</style>
+</head>
+<body>
+<section class="login" id="login">
+ <header class="topline"><div class="brand"><span class="brandLogo"><img class="brand-img" alt="Logotipo del repositorio PIUTTEC 2.0" src="docs/assets/piuttec-ii-logo.png"></span> </div></header>
+ <div class="hero"><div class="lampWrap"><div class="lampGlow"></div><svg id="lamp-svg" viewBox="0 0 200 300" aria-hidden="true"><ellipse cx="100" cy="110" rx="60" ry="30" fill="#38d99b" opacity=".12"/><rect x="92" y="100" width="16" height="160" rx="8" fill="#ccc7bf"/><rect x="60" y="250" width="80" height="12" rx="6" fill="#ccc7bf"/><path id="shade" d="M30 110 C 30 50, 170 50, 170 110 C 170 125, 30 125, 30 110 Z"/><line id="lampCord" x1="130" y1="110" x2="130" y2="180"/><circle id="lampBead" cx="130" cy="190" r="6"/><circle id="pullSurface" cx="130" cy="190" r="23" fill="transparent"/></svg><div class="instruction"><span role="button" tabindex="0" id="pullAccessible" aria-label="Jalar cuerda para encender o apagar">↓ Jala la cuerda y suéltala para encender la lámpara</span></div></div>
+ <div class="formWrap" id="formWrap" aria-hidden="true"><h1>Iniciar sesión</h1><form id="loginForm"><label for="username">Usuario</label><input id="username" type="text" autocomplete="off" placeholder="Usuario" required><label for="password">Contraseña</label><input id="password" type="password" autocomplete="off" placeholder="••••••••" required><button class="primary" type="submit">Continuar</button><button class="secondary" type="button" id="demoForm">Vista previa</button></form></div></div>
+</section>
+<section class="app" id="app"><div class="layout"><aside class="sidebar"><div class="brandLogo"><img class="brand-img" alt="Logotipo del repositorio PIUTTEC 2.0" src="docs/assets/piuttec-ii-logo.png"></div><h3>MENÚ</h3><div id="menu"></div><button class="signout" id="logout">Cerrar sesión</button></aside><main class="main"><div class="head"><h2 id="pageTitle">Calendario académico</h2></div><div class="content" id="module"></div></main></div></section>
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle"><div class="modal"><h2 id="gateTitle">Privacidad del prototipo</h2><p>Lee la información antes de continuar. PIUTTEC 2.0 es una demostración académica no oficial.</p><button class="link" type="button" id="showNotice">Leer información de privacidad</button><div class="noticeText" id="noticeText"><strong>Información de privacidad del prototipo · 23/11/2026</strong><p>Esta vista previa utiliza datos ficticios y no envía el formulario de acceso a sistemas oficiales. El proyecto PIUTTEC 2.0 no está autorizado para representar a la Universidad Tecnológica de Tecámac. En su aplicación Flutter, las cuentas de prueba pueden almacenar datos en Django y su base de datos. Evita introducir información personal real, documentos médicos o contraseñas institucionales. Para un despliegue público se debe identificar al responsable, definir finalidad, proveedores, seguridad, conservación y mecanismos de atención antes de recopilar datos reales. Este texto no sustituye un aviso legal aplicable.</p><p>Los datos de los sistemas oficiales de UTTEC son independientes. Consulta su aviso publicado en <a target="_blank" rel="noopener noreferrer" href="https://uttecamac.edomex.gob.mx/sites/uttecamac.edomex.gob.mx/files/files/PDFs/DPL/SLIDERS/AVISO_DE_PRIVACIDAD_UTTEC.pdf">el sitio institucional de UTTEC</a>.</p></div><label class="confirm" style="color:#1a2935"><input type="checkbox" id="accept"><span>He leído la información y entiendo que estoy utilizando un prototipo académico.</span></label><div class="modalActions"><button type="button" class="back" id="cancel">Volver al acceso</button><button type="button" class="go" id="continue" disabled>Continuar al calendario</button></div></div></div>
+<script>
+(()=>{
+'use strict';
+const $=x=>document.getElementById(x), login=$('login'), form=$('formWrap'), gate=$('gate'), app=$('app');
+let lit=false,dragging=false,origin=0,offset=0,mode='month',cursor=new Date(),chosen=new Date();cursor.setHours(12,0,0,0);chosen.setHours(12,0,0,0);
+const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const events={'2026-11-24':'Entrega de proyecto · Demo'};
+// URL original del archivo login_lamp_tcw_moderna.rar (no reemplazar por síntesis).
+const originalClickSound = new Audio('https://assets.codepen.io/605876/click.mp3');
+originalClickSound.preload = 'auto';
+function sound(){
+ try {
+  originalClickSound.pause();
+  originalClickSound.currentTime = 0;
+  const played = originalClickSound.play();
+  if (played && typeof played.catch === 'function') played.catch(() => {});
+ } catch (_) { /* la interfaz sigue funcionando sin red o si el navegador bloquea audio */ }
+}
+function move(y){offset=Math.min(60,Math.max(0,y));$('lampBead').setAttribute('cy',190+offset);$('lampCord').setAttribute('y2',180+offset);$('pullSurface').setAttribute('cy',190+offset)}
+function toggle(){lit=!lit;login.classList.toggle('light',lit);form.setAttribute('aria-hidden',String(!lit));sound()}
+const surface=$('pullSurface');surface.addEventListener('pointerdown',e=>{dragging=true;origin=e.clientY;surface.setPointerCapture(e.pointerId)});surface.addEventListener('pointermove',e=>{if(dragging)move((e.clientY-origin)*.85)});surface.addEventListener('pointerup',()=>{if(dragging&&offset>=28)toggle();dragging=false;move(0)});surface.addEventListener('pointercancel',()=>{dragging=false;move(0)});
+$('pullAccessible').addEventListener('keydown',e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();toggle()}});$('pullAccessible').addEventListener('click',toggle);
+function requestAccess(){gate.classList.add('active');$('accept').checked=false;$('continue').disabled=true;$('noticeText').style.display='none';$('accept').focus()}
+$('demoForm').onclick=requestAccess;$('loginForm').onsubmit=e=>{e.preventDefault();requestAccess()};$('cancel').onclick=()=>{gate.classList.remove('active');$('password').value='';$('username').value='';login.style.display='flex';app.style.display='none'};
+$('accept').onchange=e=>$('continue').disabled=!e.target.checked;$('showNotice').onclick=()=>{$('noticeText').style.display=$('noticeText').style.display==='block'?'none':'block'};
+$('continue').onclick=()=>{if(!$('accept').checked)return;gate.classList.remove('active');login.style.display='none';app.style.display='block';renderPage('calendar')};$('logout').onclick=()=>{app.style.display='none';login.style.display='flex';$('username').value='';$('password').value='';$('accept').checked=false;lit=false;login.classList.remove('light');form.setAttribute('aria-hidden','true')};
+const groups={
+ 'Inicio':[['calendar','Calendario académico'],['dashboard','Panel académico'],['agenda','Agenda, tareas y evaluaciones']],
+ 'Academia':[['materias','Materias y calificaciones'],['asistencias','Control de asistencias'],['directorio','Comparativo académico y docentes']],
+ 'Servicios y solicitudes':[['tramites','Trámites y justificantes']],
+ 'Recursos':[['reservas','Laboratorios y equipos'],['archivos','Gestor de archivos']],
+ 'Aprendizaje':[['refuerzo','Refuerzo académico']],
+ 'Sistema':[['privacidad','Privacidad del prototipo']]};
+$('menu').innerHTML=Object.entries(groups).map(([section,items],i)=>`<details ${i===0?'open':''}><summary>${section}</summary>${items.map(([id,title])=>`<button type="button" class="nav-link" data-page="${id}">${title}</button>`).join('')}</details>`).join('');
+$('menu').addEventListener('click',e=>{const b=e.target.closest('[data-page]');if(b)renderPage(b.dataset.page)});
+function renderPage(id){document.querySelectorAll('.nav-link').forEach(b=>b.classList.toggle('selected',b.dataset.page===id));let title=Object.values(groups).flat().find(x=>x[0]===id)?.[1]||'Inicio';$('pageTitle').textContent=title;if(id==='calendar')return renderCalendar();$('module').innerHTML=`<div class="card emptyPanel"><h2>${title}</h2><p>Módulo en preparación.</p></div>`}
+function keyDate(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function renderCalendar(){const title=mode==='month'?`${months[cursor.getMonth()]} de ${cursor.getFullYear()}`:mode==='week'?'Semana del '+cursor.toLocaleDateString('es-MX'):cursor.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});$('module').innerHTML=`<div class="card"><div class="calendarHead"><div><button id="prev" aria-label="Periodo anterior">❮</button> <button id="next" aria-label="Periodo siguiente">❯</button> <button id="today">Hoy</button></div><strong>${title}</strong><div><button data-mode="month" class="${mode==='month'?'active':''}">Mes</button> <button data-mode="week" class="${mode==='week'?'active':''}">Semana</button> <button data-mode="day" class="${mode==='day'?'active':''}">Día</button></div></div><div class="weekdays">${['dom','lun','mar','mié','jue','vie','sáb'].map(d=>`<span>${d}</span>`).join('')}</div><div class="calendarGrid" id="days"></div></div>`;
+ let first,count;const days=$('days');if(mode==='day'){first=new Date(cursor.getFullYear(),cursor.getMonth(),cursor.getDate());count=1}else if(mode==='week'){first=new Date(cursor);first.setDate(cursor.getDate()-cursor.getDay());count=7}else{first=new Date(cursor.getFullYear(),cursor.getMonth(),1);first.setDate(1-first.getDay());count=42}days.innerHTML=Array.from({length:count},(_,i)=>{const d=new Date(first);d.setDate(first.getDate()+i);return `<button class="day ${d.getMonth()!==cursor.getMonth()?'muted':''} ${keyDate(d)===keyDate(new Date())?'today':''}" type="button" data-date="${keyDate(d)}">${d.getDate()}${events[keyDate(d)]?`<small class="event">${events[keyDate(d)]}</small>`:''}</button>`}).join('');
+ $('prev').onclick=()=>shift(-1);$('next').onclick=()=>shift(1);$('today').onclick=()=>{cursor=new Date();renderCalendar()};document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;renderCalendar()});days.onclick=e=>{const b=e.target.closest('[data-date]');if(b){cursor=new Date(b.dataset.date+'T12:00:00');mode='day';renderCalendar()}};
+}
+function shift(n){if(mode==='month')cursor=new Date(cursor.getFullYear(),cursor.getMonth()+n,Math.min(15,cursor.getDate()));else cursor.setDate(cursor.getDate()+n*(mode==='week'?7:1));renderCalendar()}
+})();
+</script>
+</body></html>

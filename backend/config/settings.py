@@ -17,7 +17,7 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split("
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
-    "corsheaders", "rest_framework", "accounts", "dashboard",
+    "corsheaders", "rest_framework", "rest_framework_simplejwt.token_blacklist", "accounts", "dashboard", "solicitudes", "agenda", "academia", "asistencias", "recursos", "archivos", "refuerzo",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -51,6 +51,7 @@ if database_engine == "postgres":
         "PASSWORD": os.getenv("PGPASSWORD", ""),
         "HOST": os.getenv("PGHOST", "127.0.0.1"),
         "PORT": os.getenv("PGPORT", "5432"),
+        "OPTIONS": {"sslmode": os.getenv("PGSSLMODE", "prefer")},
     }}
 elif database_engine == "sqlite":
     DATABASES = {"default": {
@@ -71,6 +72,7 @@ TIME_ZONE = "America/Mexico_City"
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
@@ -80,4 +82,38 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+}
+
+# Los documentos se guardan fuera del directorio público static/web y requieren JWT.
+PRIVATE_MEDIA_ROOT = BASE_DIR / 'private_uploads'
+MEDIA_ROOT = PRIVATE_MEDIA_ROOT
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 11 * 1024 * 1024
+
+# Rate limiting básico de API. En producción se recomienda caché compartida (Redis).
+REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = [
+    "rest_framework.throttling.AnonRateThrottle",
+    "rest_framework.throttling.UserRateThrottle",
+]
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {"anon": "60/hour", "user": "600/hour"}
+
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+if not DEBUG:
+    SECURE_SSL_REDIRECT = os.getenv('DJANGO_SSL_REDIRECT', '1') == '1'
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+
+
+# Tokens JWT: rotación de refresh; logout con blacklist. Un cambio de contraseña
+# invalida JWT previos al verificar la huella de la contraseña en el claim.
+from datetime import timedelta
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "CHECK_REVOKE_TOKEN": True,
 }
