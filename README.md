@@ -20,15 +20,15 @@ Prototipo web de una plataforma de gestión académica, trámites institucionale
 - **Mi perfil (CRUD)**: consultar, editar datos personales, cambiar contraseña y eliminar/anonimizar cuenta.
 - **Gestión de usuarios** para administradores: crear, consultar, editar rol/estado y eliminar cuentas.
 - La pantalla de privacidad, el pase de lista, el calendario y los módulos existentes se conservan.
-- [Guía de autenticación, endpoints y pruebas](GUIA_LOGIN_REGISTRO_CRUD.md).
+- [Guía de autenticación, endpoints y pruebas](docs/guias/GUIA_LOGIN_REGISTRO_CRUD.md).
 - **Pendiente de certificar:** ejecutar pruebas Django y Flutter en Windows; no se ha realizado push a GitHub.
 
 ## Entrega integral del prototipo — noviembre de 2026
 
 Esta versión parte de la última entrega de asistencias Django e incorpora catálogo de recursos, revisión administrativa y devolución, justificantes asociados a faltas, gestor privado de archivos, progreso y bancos de refuerzo, perfil JWT y renovación, pruebas por módulo, CI y configuración local con Docker/PostgreSQL. **La integración es código del prototipo académico: faltan validación Flutter/Django en Windows, PostgreSQL real y despliegue público.**
 
-- [Guía exacta para Windows](GUIA_EJECUCION_FINAL.md)
-- [Matriz de cierre RF-01 a RF-13 y RNF-01 a RNF-12](CIERRE_ACADEMICO_RF_RNF.md)
+- [Guía exacta para Windows](docs/guias/GUIA_EJECUCION_FINAL.md)
+- [Matriz de cierre RF-01 a RF-13 y RNF-01 a RNF-12](docs/guias/CIERRE_ACADEMICO_RF_RNF.md)
 - Ejecutar pruebas y guardar evidencia: `powershell -ExecutionPolicy Bypass -File .\VERIFICAR_PIUTTEC.ps1`.
 - Las funciones de directorio docente y avisos programados siguen siendo demostrativas/parciales. No introducir datos institucionales reales sin autorización.
 
@@ -216,4 +216,4 @@ La información de privacidad que aparece en Flutter y en el portal HTML disting
 la instancia académica de los sistemas oficiales de UTTEC. No utilizar datos
 personales reales hasta identificar un responsable del despliegue y validar
 el aviso aplicable. Consulta [Privacidad del prototipo](CHANGELOG.md#privacidad)
-y `PLAN_DESPLIEGUE_PIUTTEC_2026.md` antes de publicar.
+y `docs/guias/PLAN_DESPLIEGUE_PIUTTEC_2026.md` antes de publicar.
