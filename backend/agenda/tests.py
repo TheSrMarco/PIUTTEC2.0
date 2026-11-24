@@ -20,8 +20,8 @@ class AgendaApiTests(APITestCase):
     def autenticar(self, usuario):
         self.client.force_authenticate(user=usuario)
 
-    def crear(self, usuario=None, **updates):
-        self.autenticar(usuario or self.alumno)
+    def crear(self, autenticado=None, **updates):
+        self.autenticar(autenticado or self.alumno)
         return self.client.post("/api/agenda/", {**self.payload, **updates}, format="json")
 
     def test_lista_exige_autenticacion(self):

@@ -10,7 +10,6 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
     await tester.pumpWidget(const MaterialApp(home: Scaffold(body: LearningGraphView())));
     expect(find.text('Mi Neurona UTTEC'), findsOneWidget);
     expect(find.text('Redes neuronales'), findsWidgets);
@@ -22,6 +21,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.widget<Text>(find.byKey(const ValueKey('topic-heading'))).data,
         'Funciones matemáticas');
+    semantics.dispose();
     expect(tester.takeException(), isNull);
   });
 
@@ -52,6 +52,10 @@ void main() {
   });
 
   testWidgets('Ruta original /neurona sigue disponible', (tester) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(const PiuttecApp());
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
     navigator.pushNamed('/neurona');

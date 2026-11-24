@@ -55,11 +55,11 @@ class _AcademiaViewState extends State<AcademiaView> {
 
   Future<void> _guardarMateria([MateriaAcademica? previous]) async {
     final formKey = GlobalKey<FormState>();
-    final nombre = TextEditingController(text: previous?.nombre ?? '');
-    final docente = TextEditingController(text: previous?.docente ?? '');
-    final aula = TextEditingController(text: previous?.aula ?? '');
-    final grupo = TextEditingController(text: previous?.grupo ?? '');
-    final nota = TextEditingController(text: previous?.calificacion?.toStringAsFixed(2) ?? '');
+    var nombre = previous?.nombre ?? '';
+    var docente = previous?.docente ?? '';
+    var aula = previous?.aula ?? '';
+    var grupo = previous?.grupo ?? '';
+    var nota = previous?.calificacion?.toStringAsFixed(2) ?? '';
     try {
       final result = await showDialog<MateriaAcademica>(
         context: context,
@@ -68,18 +68,20 @@ class _AcademiaViewState extends State<AcademiaView> {
           content: SizedBox(width: 440, child: SingleChildScrollView(
             child: Form(key: formKey, child: Column(mainAxisSize: MainAxisSize.min, children: [
               TextFormField(
-                key: const Key('materia-nombre'), controller: nombre, maxLength: 120,
+                key: const Key('materia-nombre'), initialValue: nombre,
+                onChanged: (value) => nombre = value, maxLength: 120,
                 decoration: const InputDecoration(labelText: 'Materia *'),
                 validator: (value) => value == null || value.trim().isEmpty ? 'Indica el nombre' : null,
               ),
-              TextFormField(controller: docente, maxLength: 120,
+              TextFormField(initialValue: docente, onChanged: (value) => docente = value, maxLength: 120,
                 decoration: const InputDecoration(labelText: 'Docente (opcional)')),
-              TextFormField(controller: grupo, maxLength: 50,
+              TextFormField(initialValue: grupo, onChanged: (value) => grupo = value, maxLength: 50,
                 decoration: const InputDecoration(labelText: 'Grupo (opcional)')),
-              TextFormField(controller: aula, maxLength: 80,
+              TextFormField(initialValue: aula, onChanged: (value) => aula = value, maxLength: 80,
                 decoration: const InputDecoration(labelText: 'Aula habitual (opcional)')),
               TextFormField(
-                controller: nota, keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                initialValue: nota, onChanged: (value) => nota = value,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(labelText: 'Calificación (opcional, 0–10)'),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) return null;
@@ -95,11 +97,11 @@ class _AcademiaViewState extends State<AcademiaView> {
             TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancelar')),
             FilledButton(key: const Key('materia-guardar'), onPressed: () {
               if (!formKey.currentState!.validate()) return;
-              final rawNota = nota.text.trim().replaceAll(',', '.');
+              final rawNota = nota.trim().replaceAll(',', '.');
               Navigator.pop(dialogContext, MateriaAcademica(
-                id: previous?.id ?? 0, nombre: nombre.text.trim(),
-                docente: docente.text.trim(), grupo: grupo.text.trim(),
-                aula: aula.text.trim(),
+                id: previous?.id ?? 0, nombre: nombre.trim(),
+                docente: docente.trim(), grupo: grupo.trim(),
+                aula: aula.trim(),
                 calificacion: rawNota.isEmpty ? null : double.parse(rawNota),
               ));
             }, child: const Text('Guardar')),
@@ -112,8 +114,6 @@ class _AcademiaViewState extends State<AcademiaView> {
       _mensaje('Materia guardada.');
     } catch (error) {
       _mensaje('No se pudo guardar la materia: $error');
-    } finally {
-      nombre.dispose(); docente.dispose(); aula.dispose(); grupo.dispose(); nota.dispose();
     }
   }
 
@@ -134,7 +134,7 @@ class _AcademiaViewState extends State<AcademiaView> {
     var dia = previous?.diaSemana ?? 1;
     var inicio = previous == null ? const TimeOfDay(hour: 8, minute: 0) : _time(previous.inicio);
     var fin = previous == null ? const TimeOfDay(hour: 9, minute: 0) : _time(previous.fin);
-    final aula = TextEditingController(text: previous?.aula ?? '');
+    var aula = previous?.aula ?? '';
     try {
       final result = await showDialog<ClaseHorario>(context: context,
         builder: (dialogContext) => StatefulBuilder(builder: (dialogContext, update) => AlertDialog(
@@ -176,7 +176,7 @@ class _AcademiaViewState extends State<AcademiaView> {
                 ),
               ]),
               const SizedBox(height: 12),
-              TextFormField(controller: aula, maxLength: 80,
+              TextFormField(initialValue: aula, onChanged: (value) => aula = value, maxLength: 80,
                 decoration: const InputDecoration(labelText: 'Aula (opcional)')),
             ],
           ))),
@@ -192,7 +192,7 @@ class _AcademiaViewState extends State<AcademiaView> {
               }
               Navigator.pop(dialogContext, ClaseHorario(
                 id: previous?.id ?? 0, materiaId: materiaId,
-                diaSemana: dia, inicio: start, fin: end, aula: aula.text.trim(),
+                diaSemana: dia, inicio: start, fin: end, aula: aula.trim(),
               ));
             }, child: const Text('Guardar')),
           ],
@@ -204,8 +204,6 @@ class _AcademiaViewState extends State<AcademiaView> {
       _mensaje('Horario guardado. Visible también en el calendario.');
     } catch (error) {
       _mensaje('No se pudo guardar el horario: $error');
-    } finally {
-      aula.dispose();
     }
   }
 
