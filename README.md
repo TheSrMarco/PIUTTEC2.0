@@ -1,5 +1,7 @@
 # PIUTTEC (2.0)
 
+[Historial de cambios](CHANGELOG.md)
+
 <p align="center">
   <img src="docs/assets/piuttec-ii-logo.png" alt="Logo principal de PIUTTEC II" width="820">
 </p>
@@ -148,14 +150,14 @@ Abre `VISTA_PREVIA.html` desde esta misma carpeta, con sus recursos locales en `
 
 ### Límites de verificación
 
-Este paquete se integró y se revisó de forma estática, pero **no se ejecutaron** `flutter analyze`, `flutter test` ni los tests Django en el entorno de generación. Ver `ESTADO_Y_PRUEBAS.md`.
+Este paquete se integró y se revisó de forma estática, pero **no se ejecutaron** `flutter analyze`, `flutter test` ni los tests Django en el entorno de generación. Ver [Estado historico de integracion](CHANGELOG.md#estado-pruebas).
 
 
 ## Avance RF-03: Agenda y calendario integrados
 
 La vista **Agenda, tareas y evaluaciones** ahora tiene CRUD de tareas, evaluaciones y eventos, marcación de completadas y filtros. Las actividades se muestran también en el **Calendario**. En modo autenticado se persisten por usuario en la API Django `/api/agenda/`; en modo demostración el almacenamiento es local al navegador.
 
-Después de actualizar el proyecto, ejecuta `python manage.py migrate` en `backend` y `flutter pub get` en `frontend`. Consulta [AVANCE_RF03_AGENDA_2026.md](AVANCE_RF03_AGENDA_2026.md) para pruebas y estado técnico.
+Después de actualizar el proyecto, ejecuta `python manage.py migrate` en `backend` y `flutter pub get` en `frontend`. Consulta [AVANCE_RF03_AGENDA_2026.md](CHANGELOG.md#rf-03-agenda) para pruebas y estado técnico.
 
 ## RF-02 — Materias y horarios semanales (23/11/2026)
 
@@ -171,7 +173,7 @@ Después de actualizar el proyecto, ejecuta `python manage.py migrate` en `backe
   **no modifica** los datos académicos institucionales ni las asistencias existentes.
 - Verifica desde backend: `python manage.py migrate`, `python manage.py test academia -v 2`.
 - Verifica desde frontend: `flutter analyze`, `flutter test`, `flutter run -d chrome --web-port 5173`.
-- Consulta `AVANCE_RF02_MATERIAS_HORARIOS_2026.md` para el detalle y límites.
+- Consulta [RF-02: materias y horarios](CHANGELOG.md#rf-02-materias-horarios) para el detalle y límites.
 
 ## RF-04 — Comparativo de rendimiento académico
 
@@ -179,7 +181,7 @@ Después de actualizar el proyecto, ejecuta `python manage.py migrate` en `backe
 - En Django: `GET /api/rendimiento/` con JWT. Reutiliza `Materia` de RF-02, sin migración nueva.
 - La vista previa solo utiliza notas personales del almacenamiento local. **No se inventa una media grupal**.
 - Las notas y grupos registrados son de prueba, no calificaciones oficiales validadas por UTTEC. No consultar información real de estudiantes sin autorización institucional.
-- Para los comandos y límites: [AVANCE_RF04_RENDIMIENTO_ACADEMICO_2026.md](AVANCE_RF04_RENDIMIENTO_ACADEMICO_2026.md).
+- Para los comandos y límites: [AVANCE_RF04_RENDIMIENTO_ACADEMICO_2026.md](CHANGELOG.md#rf-04-rendimiento).
 
 
 ## RF-01 — Panel académico con datos registrados (23/11/2026)
@@ -188,14 +190,14 @@ El menú **Inicio → Panel académico** muestra materias, promedio de las notas
 
 - API: `GET /api/dashboard/resumen/` (JWT obligatorio, registros del usuario).
 - No requiere migración adicional.
-- Ver detalles y pruebas pendientes en [`AVANCE_RF01_DASHBOARD_REAL_2026.md`](AVANCE_RF01_DASHBOARD_REAL_2026.md).
+- Ver detalles y pruebas pendientes en [[RF-01: panel academico](CHANGELOG.md#rf-01-panel)](CHANGELOG.md#rf-01-panel).
 
 
 ## Pase de lista persistente en Django (integración posterior a RF-01)
 
 Con sesión JWT, **Academia → Pase de lista y asistencias** muestra las materias registradas en RF-02 y guarda P/R/J/F por materia y fecha mediante `/api/asistencias/`. Puede corregir o eliminar marcas, consultar historial y marcar todas las materias como presentes. Los registros se aíslan por cuenta; Django exige una única marca por materia y día. **No son asistencias oficiales verificadas por la UTTEC**, sino registros personales para probar el sistema.
 
-El panel RF-01 puede calcular el porcentaje a partir de esos registros; sin registros muestra `N/D`. En Vista previa se conserva el pase de lista local anterior, sin importar sus ejemplos a la cuenta Django. Consulta `AVANCE_ASISTENCIAS_DJANGO_2026.md` para endpoints, migración y pruebas.
+El panel RF-01 puede calcular el porcentaje a partir de esos registros; sin registros muestra `N/D`. En Vista previa se conserva el pase de lista local anterior, sin importar sus ejemplos a la cuenta Django. Consulta [Asistencias y dashboard Django](CHANGELOG.md#asistencias-django) para endpoints, migración y pruebas.
 
 
 ## Mi Neurona UTTEC (restaurada de la rama feature/neurona-uttec-demo)
@@ -205,7 +207,7 @@ Contiene doce temas conectados de Redes digitales, Programación, Matemáticas e
 con explicaciones, ejemplos, mapa interactivo, apuntes personales temporales y autoevaluación.
 **No es una red neuronal entrenada ni usa TensorFlow**: es un mapa conceptual de aprendizaje.
 Los apuntes se conservan mientras la vista permanezca abierta y se reinician al salir o recargar.
-Más información y pruebas: `RESTAURACION_MI_NEURONA_UTTEC.md`.
+Más información y pruebas: [Recuperacion de Mi Neurona UTTEC](CHANGELOG.md#mi-neurona).
 
 
 ## Privacidad específica del prototipo (23/11/2026)
@@ -213,5 +215,5 @@ Más información y pruebas: `RESTAURACION_MI_NEURONA_UTTEC.md`.
 La información de privacidad que aparece en Flutter y en el portal HTML distingue
 la instancia académica de los sistemas oficiales de UTTEC. No utilizar datos
 personales reales hasta identificar un responsable del despliegue y validar
-el aviso aplicable. Consulta `CORRECCION_PRIVACIDAD_PROTOTIPO_23NOV2026.md`
+el aviso aplicable. Consulta [Privacidad del prototipo](CHANGELOG.md#privacidad)
 y `PLAN_DESPLIEGUE_PIUTTEC_2026.md` antes de publicar.
