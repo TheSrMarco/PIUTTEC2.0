@@ -18,12 +18,14 @@ class DashboardViewModel extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
-      final result = await _repository.loadDemo();
+      final result = await _repository.cargar();
       if (_disposed) return;
       data = result;
-    } catch (_) {
+    } catch (ex) {
       if (_disposed) return;
-      error = 'No pudimos cargar el panel. Comprueba que la API local esté encendida.';
+      error = ex is FormatException
+          ? ex.message
+          : 'No pudimos cargar el panel. Verifica la conexión o los datos guardados.';
     } finally {
       if (!_disposed) {
         loading = false;
@@ -35,6 +37,7 @@ class DashboardViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _repository.dispose();
     super.dispose();
   }
 }

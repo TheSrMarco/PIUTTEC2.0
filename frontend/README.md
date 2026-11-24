@@ -1,6 +1,6 @@
 # Aplicación PIUTTEC 2.0
 
-Base Flutter para web, Android e iOS. El panel consume datos de demostración desde Django y el menú reproduce las secciones del prototipo HTML. Las otras secciones muestran su estado de desarrollo.
+Aplicación Flutter para web, Android e iOS. El acceso incluye lámpara con cuerda y JWT, aviso de privacidad obligatorio y calendario. La navegación agrupa únicamente módulos del reporte PIUTTEC 2.0. Varias secciones muestran datos de ejemplo; solicitudes RF-12 utiliza la API Django.
 
 ## Ejecutar en Windows
 
@@ -32,3 +32,11 @@ Las carpetas web, android e ios son las plataformas generadas por Flutter. La co
 flutter analyze
 flutter build web
 ~~~
+
+## Nuevo flujo de acceso
+
+Jala la cuerda para abrir el formulario. La lámpara intenta reproducir el audio original de la fuente remota CodePen. Tras un acceso Django válido o elegir la vista previa, aparece un aviso de privacidad que debe aceptarse antes de abrir el calendario.
+
+El logotipo completo se carga desde `assets/branding/piuttec-ii-logo.png` sin conexión a GitHub. La pantalla de solicitudes recibe el token JWT del login principal, sin solicitar credenciales dos veces. Los módulos demostrativos siguen sin persistencia en servidor.
+
+Ver el README de la raíz para levantar el backend y ejecutar las pruebas.

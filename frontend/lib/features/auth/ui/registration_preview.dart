@@ -13,13 +13,12 @@ class RegistrationPreview extends StatefulWidget {
 
 class _RegistrationPreviewState extends State<RegistrationPreview> {
   bool _noticeRead = false;
-  bool _optionalPurposes = false;
 
   void _openFullNotice() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => Scaffold(
-          appBar: AppBar(title: const Text('Aviso de privacidad integral')),
+          appBar: AppBar(title: const Text('Privacidad del prototipo')),
           body: const PrivacyNoticeView(),
         ),
       ),
@@ -64,7 +63,7 @@ class _RegistrationPreviewState extends State<RegistrationPreview> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Crear cuenta institucional',
+                    'Crear cuenta de demostración',
                     style: textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -91,7 +90,7 @@ class _RegistrationPreviewState extends State<RegistrationPreview> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Aviso de privacidad simplificado',
+                                  'Información de privacidad del prototipo',
                                   style: textTheme.titleLarge?.copyWith(
                                     color: colors.onPrimaryContainer,
                                     fontWeight: FontWeight.bold,
@@ -102,13 +101,10 @@ class _RegistrationPreviewState extends State<RegistrationPreview> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'La Universidad Tecnológica de Tecámac (UTTEC) '
-                            'es la institución prevista para operar PIUTTEC '
-                            '2.0. Los datos de identificación y académicos '
-                            'se utilizarían para crear la cuenta, prestar '
-                            'servicios escolares y gestionar trámites. Esta '
-                            'demostración no envía ni conserva los datos que '
-                            'escribas en este formulario.',
+                            'PIUTTEC 2.0 es un prototipo académico no oficial. '
+                            'La versión demostrativa de este formulario no '
+                            'envía ni guarda los datos escritos. No utilices '
+                            'cuentas institucionales ni información personal real.',
                             style: TextStyle(color: colors.onPrimaryContainer),
                           ),
                           const SizedBox(height: 12),
@@ -180,23 +176,7 @@ class _RegistrationPreviewState extends State<RegistrationPreview> {
                             },
                             controlAffinity: ListTileControlAffinity.leading,
                             title: const Text(
-                              'Confirmo que pude consultar el aviso de privacidad.',
-                            ),
-                          ),
-                          CheckboxListTile(
-                            contentPadding: EdgeInsets.zero,
-                            value: _optionalPurposes,
-                            onChanged: (value) {
-                              setState(
-                                () => _optionalPurposes = value ?? false,
-                              );
-                            },
-                            controlAffinity: ListTileControlAffinity.leading,
-                            title: const Text(
-                              'Deseo recibir avisos opcionales, encuestas y tutorías.',
-                            ),
-                            subtitle: const Text(
-                              'Opcional y separado del registro académico.',
+                              'He leído la información de privacidad del prototipo.',
                             ),
                           ),
                           const SizedBox(height: 16),

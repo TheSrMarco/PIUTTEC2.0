@@ -1,0 +1,8 @@
+.venv
+.env
+*.sqlite3
+*.sqlite3.bak
+__pycache__/
+*.pyc
+private_uploads/
+staticfiles/

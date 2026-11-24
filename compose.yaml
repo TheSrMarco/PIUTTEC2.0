@@ -1,0 +1,41 @@
+# Infraestructura local, deliberadamente sin publicación pública/HTTPS.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PGDATABASE:?Define PGDATABASE}
+      POSTGRES_USER: ${PGUSER:?Define PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD:?Define PGPASSWORD}
+    volumes:
+      - piuttec_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DJANGO_DEBUG: "0"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Define DJANGO_SECRET_KEY}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_SSL_REDIRECT: "0" # Solo desarrollo local. En producción: proxy HTTPS y activar redirección.
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      DB_ENGINE: postgres
+      PGDATABASE: ${PGDATABASE:?Define PGDATABASE}
+      PGUSER: ${PGUSER:?Define PGUSER}
+      PGPASSWORD: ${PGPASSWORD:?Define PGPASSWORD}
+      PGHOST: postgres
+      PGPORT: "5432"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - piuttec_uploads:/app/private_uploads
+volumes:
+  piuttec_pgdata:
+  piuttec_uploads:

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PIUTTEC 2.0 - Plataforma Integral Universitaria de la Universidad Tecnológica de Tecámac para gestión académica, asistencia, préstamos de laboratorios y trámites institucionales.">
+    <meta name="description" content="PIUTTEC 2.0 - Prototipo académico no oficial de gestión de materias, asistencias, recursos y aprendizaje. Solo datos ficticios.">
     <title>PIUTTEC 2.0 | Portal Académico e Institucional UTTec</title>
     
     <!-- Tailwind CSS -->
@@ -26,12 +26,17 @@
                     },
                     colors: {
                         brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            900: '#312e81',
+                            50: '#effcf4',
+                            100: '#d9f9e7',
+                            200: '#b8efd0',
+                            300: '#8be4b3',
+                            400: '#47c98a',
+                            500: '#0fa958',
+                            600: '#087c49',
+                            700: '#06683f',
+                            800: '#075738',
+                            900: '#064a33',
+                            950: '#052f23',
                         },
                         uttec: {
                             green: '#006847',
@@ -58,7 +63,7 @@
     </script>
 
     <!-- Estilos externos -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="Style.css">
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-brand-500 selection:text-white overflow-hidden transition-colors duration-300">
 
@@ -74,7 +79,7 @@
             <!-- Logo Institucional -->
             <div class="h-16 flex items-center justify-between px-5 border-b border-slate-200 dark:border-slate-800 shrink-0">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-indigo-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 via-brand-600 to-brand-400 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
                         <i class="fa-solid fa-graduation-cap text-lg"></i>
                     </div>
                     <div>
@@ -94,7 +99,7 @@
             <div class="p-4 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/60 shrink-0">
                 <div class="flex items-center gap-3">
                     <div class="relative shrink-0">
-                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-600 to-indigo-500 text-white flex items-center justify-center font-display font-bold text-sm shadow-sm">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-500 text-white flex items-center justify-center font-display font-bold text-sm shadow-sm">
                             SM
                         </div>
                         <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full" title="Alumno Regular Activo"></span>
@@ -216,7 +221,7 @@
                     <span id="storageText" class="font-bold text-slate-700 dark:text-slate-300">42.5 MB / 5 GB</span>
                 </div>
                 <div class="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div id="storageBar" class="h-full bg-gradient-to-r from-brand-600 to-indigo-400 rounded-full transition-all duration-300" style="width: 14%"></div>
+                    <div id="storageBar" class="h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full transition-all duration-300" style="width: 14%"></div>
                 </div>
                 <button onclick="openUploadModal()" class="mt-3 w-full py-2 px-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Subir Archivo Rápido
@@ -301,14 +306,14 @@
 
                 <!-- 1. PANEL PRINCIPAL -->
                 <section id="view-dashboard" class="tab-view fade-in space-y-6">
-                    <div class="bg-gradient-to-r from-slate-900 via-brand-900 to-indigo-900 text-white rounded-3xl p-6 shadow-lg flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
+                    <div class="bg-gradient-to-r from-slate-900 via-brand-900 to-brand-900 text-white rounded-3xl p-6 shadow-lg flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
                         <div class="relative z-10 space-y-1.5">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-semibold backdrop-blur-xs">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-brand-100 text-xs font-semibold backdrop-blur-xs">
                                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                                 <span id="liveClockBadge">Cuatrimestre Sep - Dic 2026 • Semana 11</span>
                             </div>
                             <h1 class="font-display text-2xl sm:text-3xl font-extrabold tracking-tight">¡Hola de nuevo, Sofía!</h1>
-                            <p class="text-sm text-indigo-200 max-w-xl">
+                            <p class="text-sm text-brand-100 max-w-xl">
                                 Tienes <span id="dashPendingCountText" class="font-bold text-white underline decoration-amber-400">3 entregas pendientes</span> esta semana y tu promedio general se mantiene en nivel de excelencia.
                             </p>
                         </div>
@@ -318,7 +323,7 @@
                                 <i class="fa-solid fa-stopwatch"></i>
                             </div>
                             <div>
-                                <span class="text-[11px] uppercase tracking-wider text-indigo-200 font-bold block">Enfoque de Estudio</span>
+                                <span class="text-[11px] uppercase tracking-wider text-brand-100 font-bold block">Enfoque de Estudio</span>
                                 <span id="pomodoroDisplay" class="font-display text-2xl font-extrabold tracking-wider">25:00</span>
                             </div>
                             <div class="flex items-center gap-1.5 ml-2">
@@ -340,7 +345,7 @@
                                 <h3 id="kpiPromedioGlobal" class="font-display text-2xl font-extrabold mt-1">9.1</h3>
                                 <p id="kpiMateriasSub" class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-1">6 materias cursando</p>
                             </div>
-                            <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-300 flex items-center justify-center text-xl">
                                 <i class="fa-solid fa-award"></i>
                             </div>
                         </div>

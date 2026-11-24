@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#111a29" />
+<title>PIUTTEC 2.0 · Bienvenida fluida</title>
+<style>
+  :root{color-scheme:dark;--night:#111a29;--gold:#f7ce82}
+  *{box-sizing:border-box}body{background:var(--night);color:#fff;font-family:system-ui,sans-serif;margin:0;min-height:100vh;overflow:hidden}
+  #fluid{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:.8;pointer-events:auto}
+  .veil{position:fixed;inset:0;z-index:1;background:linear-gradient(95deg,rgba(12,20,36,.86),rgba(12,20,36,.55) 70%,rgba(12,20,36,.4));pointer-events:none}
+  .center{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;padding:clamp(20px,8vw,100px);pointer-events:none}
+  main{max-width:700px}.eyebrow{font-size:.85rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+  h1{font-size:clamp(3rem,8vw,6.5rem);line-height:1.02;letter-spacing:-.06em;margin:.4em 0 .25em}
+  .subtitle{max-width:560px;color:#d0e0ef;line-height:1.6;font-size:clamp(1rem,2vw,1.2rem)}
+  .button{display:inline-flex;align-items:center;text-decoration:none;justify-content:center;min-height:52px;padding:0 24px;border-radius:14px;font-weight:750;margin:24px 12px 0 0;background:var(--gold);color:#101b2b}
+  .secondary{background:transparent;color:#fff;border:1px solid #adc0cf}
+  .footer{font-size:.75rem;color:#a5b7c8;margin-top:26px}button{cursor:pointer;font:inherit}
+  a,button{pointer-events:auto}a:focus-visible,button:focus-visible{outline:3px solid white;outline-offset:5px}
+  @media(prefers-reduced-motion:reduce){#fluid{display:none}.veil{background:linear-gradient(120deg,#101a2b,#173d54)}}
+</style>
+</head>
+<body>
+<canvas id="fluid" aria-hidden="true"></canvas><div class="veil"></div>
+<div class="center"><main>
+  <div class="eyebrow">Universidad Tecnológica de Tecámac</div>
+  <h1>Tu campus,<br />a tu alcance.</h1>
+  <p class="subtitle">Materias, asistencia, tareas, recursos y solicitudes en una experiencia unificada. En un solo lugar.</p>
+  <a class="button" href="/">Ingresar</a>
+  <button class="button secondary" id="reduce" type="button" aria-pressed="false">Desactivar efectos</button>
+
+</main></div>
+<script type="module">
+  import WebGLFluid from './fluid/webgl-fluid.js';
+  const canvas = document.querySelector('#fluid');
+  const reduce = document.querySelector('#reduce');
+  const prefersLess = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(prefersLess) canvas.style.display='none';
+  else {
+    try {
+      if(canvas.getContext('webgl2') || canvas.getContext('webgl')) {
+        // Parámetros conservadores: no mantiene trazos automáticos ni rayos solares.
+        WebGLFluid(canvas, {
+          AUTO: false, IMMEDIATE: true, TRIGGER: 'hover',
+          SIM_RESOLUTION: 64, DYE_RESOLUTION: 256,
+          BLOOM: false, SUNRAYS: false, PRESSURE_ITERATIONS: 12,
+          SPLAT_COUNT: 4, SPLAT_COLOR: {r:0.08,g:0.24,b:0.4},
+        });
+      } else canvas.style.display='none';
+    } catch(e) { canvas.style.display='none'; console.warn('WebGL no disponible:',e); }
+  }
+  reduce.addEventListener('click', () => {
+    const hidden = canvas.style.display==='none';
+    canvas.style.display=hidden?'block':'none';
+    reduce.setAttribute('aria-pressed',String(!hidden));
+    reduce.textContent=hidden?'Desactivar efectos':'Activar efectos';
+  });
+</script>
+</body>
+</html>

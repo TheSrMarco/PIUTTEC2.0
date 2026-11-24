@@ -11,8 +11,8 @@
     --border-subtle: #e2e8f0;
     --scrollbar-thumb: rgba(148, 163, 184, 0.35);
     --scrollbar-thumb-hover: rgba(148, 163, 184, 0.65);
-    --brand-accent: #4f46e5;
-    --brand-glow: rgba(79, 70, 229, 0.18);
+    --brand-accent: #087c49;
+    --brand-glow: rgba(15, 169, 88, 0.18);
     color-scheme: light;
 }
 
@@ -25,8 +25,8 @@ html.dark {
     --border-subtle: #1e293b;
     --scrollbar-thumb: rgba(100, 116, 139, 0.45);
     --scrollbar-thumb-hover: rgba(148, 163, 184, 0.7);
-    --brand-accent: #6366f1;
-    --brand-glow: rgba(99, 102, 241, 0.25);
+    --brand-accent: #8be4b3;
+    --brand-glow: rgba(15, 169, 88, 0.25);
     color-scheme: dark;
 }
 
