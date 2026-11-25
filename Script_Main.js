@@ -1075,6 +1075,190 @@ function recalculateSimulatedGpa() {
     }
 }
 
+/* ==========================================================================
+   11. MÓDULOS AVANZADOS (WHAT-IF, ALERTAS TEMPRANAS Y ASESORÍAS P2P)
+   ========================================================================== */
+
+// A. Simulador de Escenarios "¿Qué pasaría si...?" (sincronizado con appState.materias)
+function loadSubjectData() {
+    const select = document.getElementById('subjectSelect');
+    if (!select) return;
+    const mat = appState.materias.find(m => m.id === select.value) || appState.materias[0];
+    if (!mat) return;
+
+    const p1El = document.getElementById('p1Slider');
+    const p2El = document.getElementById('p2Slider');
+    const finEl = document.getElementById('finalSlider');
+    if (!p1El || !p2El || !finEl) return;
+
+    p1El.value = Number(mat.nota).toFixed(1);
+    p2El.value = Math.min(10, Number(mat.nota) + 0.2).toFixed(1);
+    finEl.value = '9.0';
+    calculateWhatIf();
+}
+
+function calculateWhatIf() {
+    const select = document.getElementById('subjectSelect');
+    if (!select) return;
+    const mat = appState.materias.find(m => m.id === select.value);
+    const goal = mat && mat.nota >= 9.0 ? 9.0 : 8.5;
+    const goalName = goal >= 9.0 ? 'Mantener Beca (9.0)' : 'Exentar Final (8.5)';
+
+    const p1 = parseFloat(document.getElementById('p1Slider').value);
+    const p2 = parseFloat(document.getElementById('p2Slider').value);
+    const fin = parseFloat(document.getElementById('finalSlider').value);
+
+    document.getElementById('p1Label').textContent = p1.toFixed(1);
+    document.getElementById('p2Label').textContent = p2.toFixed(1);
+    document.getElementById('finalLabel').textContent = fin.toFixed(1);
+
+    const avg = (p1 * 0.30) + (p2 * 0.30) + (fin * 0.40);
+    document.getElementById('projectedAvg').textContent = avg.toFixed(2);
+
+    const badge = document.getElementById('goalBadge');
+    const msg = document.getElementById('goalMessage');
+
+    badge.className = 'inline-block px-3 py-1 rounded-lg text-xs font-bold text-white transition-colors';
+
+    if (avg >= goal) {
+        badge.textContent = 'Meta Alcanzada';
+        badge.classList.add('bg-brand-600');
+        msg.textContent = `Logras: ${goalName}`;
+    } else if (avg >= 7.0) {
+        badge.textContent = 'Aprueba sin Meta';
+        badge.classList.add('bg-amber-500');
+        const diff = (goal - avg).toFixed(2);
+        msg.textContent = `Te faltan +${diff} pts para ${goalName}`;
+    } else {
+        badge.textContent = 'Riesgo de Reprobación';
+        badge.classList.add('bg-rose-600');
+        msg.textContent = 'Promedio menor a 7.0 (Extraordinario)';
+    }
+}
+
+// B. Semáforo de Alertas Tempranas (cruce real de asistencias y tareas pendientes)
+function renderRiskAlerts() {
+    const container = document.getElementById('riskContainer');
+    if (!container) return;
+
+    container.innerHTML = appState.materias.map(m => {
+        const pctAsistencia = calcMateriaAsistenciaPct(m);
+        const totalSesiones = m.p + m.r + m.j + m.f;
+        const maxFaltas = Math.max(1, Math.floor(totalSesiones * 0.20));
+        const faltasEfectivas = m.f + Math.floor(m.r / 3);
+        const faltasRestantes = Math.max(0, maxFaltas - faltasEfectivas);
+        const entregasPendientes = appState.tareas.filter(t => !t.completada && t.materia === m.nombre).length;
+
+        let cardBorder = 'border-l-brand-500 bg-white dark:bg-slate-800/40';
+        let badgeStyle = 'bg-brand-100 text-brand-800 dark:bg-brand-950 dark:text-brand-300';
+        let statusText = 'Óptimo';
+        let alertNote = `Te quedan ${faltasRestantes} falta${faltasRestantes === 1 ? '' : 's'} disponible${faltasRestantes === 1 ? '' : 's'}.`;
+
+        if (pctAsistencia < 80 || faltasRestantes === 0 || (faltasRestantes <= 1 && entregasPendientes >= 1)) {
+            cardBorder = 'border-l-rose-600 bg-rose-50/60 dark:bg-rose-950/20';
+            badgeStyle = 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300';
+            statusText = 'Alerta Crítica';
+            alertNote = `¡Atención! Límite reglamentario al borde (${faltasEfectivas}/${maxFaltas} faltas) y ${entregasPendientes} entrega(s) pendiente(s).`;
+        } else if (faltasRestantes <= 2 || entregasPendientes >= 1) {
+            cardBorder = 'border-l-amber-500 bg-amber-50/40 dark:bg-amber-950/15';
+            badgeStyle = 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+            statusText = 'Preventivo';
+            alertNote = `Asistencia al ${pctAsistencia}%. Prioriza tus entregas pendientes para evitar rezago.`;
+        }
+
+        return `
+            <div class="border border-slate-200 dark:border-slate-800 border-l-4 ${cardBorder} rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h3 class="font-display font-bold text-sm text-slate-900 dark:text-white">${m.nombre} <span class="text-[11px] font-normal text-slate-400">(${m.codigo})</span></h3>
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        <span>📅 Asistencia: <strong class="text-slate-700 dark:text-slate-200">${pctAsistencia}%</strong> (${faltasEfectivas}/${maxFaltas} faltas)</span>
+                        <span>📝 Pendientes: <strong class="text-slate-700 dark:text-slate-200">${entregasPendientes}</strong></span>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mt-1.5">${alertNote}</p>
+                </div>
+                <span class="self-start sm:self-center shrink-0 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wide ${badgeStyle}">
+                    ${statusText}
+                </span>
+            </div>
+        `;
+    }).join('');
+}
+
+// C. Banco de Asesorías entre Pares (P2P) con persistencia en appState
+function renderTutors(filter = activeTutorCategory) {
+    const grid = document.getElementById('tutorGrid');
+    if (!grid) return;
+
+    const filtered = filter === 'Todas'
+        ? appState.asesoriasP2P
+        : appState.asesoriasP2P.filter(t => t.subject === filter);
+
+    grid.innerHTML = filtered.map(tutor => {
+        const canAfford = appState.puntosAcademicos >= tutor.cost;
+        let btnText = `Canjear por ${tutor.cost} pts`;
+        let btnClasses = 'bg-uttec-green hover:bg-brand-800 text-white cursor-pointer';
+        let disabledAttr = '';
+
+        if (tutor.booked) {
+            btnText = '✓ Sesión Agendada';
+            btnClasses = 'bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 cursor-default';
+            disabledAttr = 'disabled';
+        } else if (!canAfford) {
+            btnText = `Insuficiente (${tutor.cost} pts)`;
+            btnClasses = 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed';
+            disabledAttr = 'disabled';
+        }
+
+        return `
+            <div class="border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 rounded-xl p-4 flex flex-col justify-between gap-4 hover:border-brand-300 dark:hover:border-brand-700 transition">
+                <div>
+                    <div class="flex items-start justify-between gap-2">
+                        <h3 class="font-display font-bold text-sm text-slate-900 dark:text-white leading-snug">${tutor.name}</h3>
+                        <span class="shrink-0 bg-uttec-gold/20 text-amber-800 dark:text-uttec-gold text-[11px] font-bold px-2 py-0.5 rounded-md">
+                            Prom: ${tutor.avg}
+                        </span>
+                    </div>
+                    <span class="inline-block text-xs font-semibold text-brand-600 dark:text-brand-400 mt-1">${tutor.subject}</span>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                        <strong>Tema:</strong> ${tutor.topic}
+                    </p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1">
+                        <span>🕒</span> ${tutor.schedule}
+                    </p>
+                </div>
+
+                <button ${disabledAttr} onclick="bookSession(${tutor.id})"
+                        class="w-full py-2 px-3 rounded-lg text-xs font-semibold transition ${btnClasses}">
+                    ${btnText}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+function filterTutors(category, btnElement) {
+    activeTutorCategory = category;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.className = 'filter-btn px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer';
+    });
+    if (btnElement) {
+        btnElement.className = 'filter-btn active px-3.5 py-1.5 rounded-full text-xs font-semibold bg-uttec-green text-white transition cursor-pointer';
+    }
+    renderTutors(category);
+}
+
+function bookSession(id) {
+    const tutor = appState.asesoriasP2P.find(t => t.id === id);
+    if (tutor && !tutor.booked && appState.puntosAcademicos >= tutor.cost) {
+        appState.puntosAcademicos -= tutor.cost;
+        tutor.booked = true;
+        saveState();
+        updateBadges();
+        renderTutors(activeTutorCategory);
+        showToast(`Asesoría agendada con ${tutor.name} (-${tutor.cost} pts).`, 'success');
+    }
+}
+
 /* --- BUSCADOR GLOBAL Y NOTIFICACIONES --- */
 function handleGlobalSearch(query) {
     const box = document.getElementById('globalSearchResults');
