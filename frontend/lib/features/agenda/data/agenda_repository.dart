@@ -138,8 +138,8 @@ class AgendaRepository {
       });
     } else {
       final query = <String, String>{};
-      if (desde != null) query['desde'] = fechaTexto(desde);
-      if (hasta != null) query['hasta'] = fechaTexto(hasta);
+      if (desde != null) query['desde'] = AgendaItem.fechaTexto(desde);
+      if (hasta != null) query['hasta'] = AgendaItem.fechaTexto(hasta);
       final response = await _client.get(
         _url().replace(queryParameters: query),
         headers: _headers,
