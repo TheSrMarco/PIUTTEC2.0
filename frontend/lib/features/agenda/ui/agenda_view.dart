@@ -17,6 +17,8 @@ class _AgendaViewState extends State<AgendaView> {
   bool _loading = true;
   String? _error;
   String _filter = 'todas';
+  DateTime? _desde;
+  DateTime? _hasta;
 
   @override
   void initState() {
@@ -34,7 +36,7 @@ class _AgendaViewState extends State<AgendaView> {
   Future<void> _reload() async {
     if (mounted) setState(() { _loading = true; _error = null; });
     try {
-      final list = await _repository.listar();
+      final list = await _repository.listar(desde: _desde, hasta: _hasta);
       if (mounted) setState(() => _items = list);
     } catch (error) {
       if (mounted) setState(() => _error = error.toString());
@@ -180,11 +182,41 @@ class _AgendaViewState extends State<AgendaView> {
     }
   }
 
+  Future<void> _chooseDateRange() async {
+    final now = DateTime.now();
+    final initial = _desde == null || _hasta == null
+        ? DateTimeRange(
+            start: DateTime(now.year, now.month, now.day),
+            end: DateTime(now.year, now.month, now.day).add(const Duration(days: 30)),
+          )
+        : DateTimeRange(start: _desde!, end: _hasta!);
+    final chosen = await showDateRangePicker(
+      context: context,
+      initialDateRange: initial,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+      helpText: 'Consultar fechas de evaluación',
+      cancelText: 'Cancelar',
+      confirmText: 'Consultar',
+    );
+    if (chosen == null) return;
+    setState(() {
+      _desde = chosen.start;
+      _hasta = chosen.end;
+    });
+    await _reload();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final filtered = _items.where((item) =>
-      _filter == 'todas' || (_filter == 'pendientes' && !item.completada)
-        || (_filter == 'completadas' && item.completada)).toList();
+    final filtered = _items.where((item) {
+      if (_filter == 'pendientes') return !item.completada;
+      if (_filter == 'completadas') return item.completada;
+      if (_filter == 'evaluaciones') return item.tipo == 'evaluacion';
+      if (_filter == 'tareas') return item.tipo == 'tarea';
+      if (_filter == 'eventos') return item.tipo == 'evento';
+      return true;
+    }).toList();
     final pending = _items.where((item) => !item.completada).length;
     return ListView(padding: const EdgeInsets.all(24), children: [
       Wrap(spacing: 14, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -201,9 +233,32 @@ class _AgendaViewState extends State<AgendaView> {
       Wrap(spacing: 8, runSpacing: 8, children: [
         Chip(avatar: const Icon(Icons.event_note, size: 17), label: Text('${_items.length} actividades')),
         Chip(avatar: const Icon(Icons.pending_actions, size: 17), label: Text('$pending pendientes')),
-        for (final filter in ['todas', 'pendientes', 'completadas'])
-          ChoiceChip(label: Text(filter == 'todas' ? 'Todas' : filter == 'pendientes' ? 'Pendientes' : 'Completadas'),
+        for (final filter in ['todas', 'evaluaciones', 'tareas', 'eventos', 'pendientes', 'completadas'])
+          ChoiceChip(label: Text(switch (filter) {
+            'todas' => 'Todas',
+            'evaluaciones' => 'Evaluaciones',
+            'tareas' => 'Tareas',
+            'eventos' => 'Eventos',
+            'pendientes' => 'Pendientes',
+            _ => 'Completadas',
+          }),
             selected: _filter == filter, onSelected: (_) => setState(() => _filter = filter)),
+        OutlinedButton.icon(
+          onPressed: _chooseDateRange,
+          icon: const Icon(Icons.date_range),
+          label: Text(_desde == null || _hasta == null
+              ? 'Consultar por fechas'
+              : '${AgendaItem.fechaTexto(_desde!)} – ${AgendaItem.fechaTexto(_hasta!)}'),
+        ),
+        if (_desde != null || _hasta != null)
+          TextButton.icon(
+            onPressed: () async {
+              setState(() { _desde = null; _hasta = null; });
+              await _reload();
+            },
+            icon: const Icon(Icons.clear),
+            label: const Text('Limpiar fechas'),
+          ),
       ]),
       const SizedBox(height: 16),
       if (_loading) const LinearProgressIndicator(),

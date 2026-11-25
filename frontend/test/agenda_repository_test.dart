@@ -67,4 +67,43 @@ void main() {
     expect(repository.listar(), throwsA(isA<FormatException>()));
     repository.dispose();
   });
+
+  test('Filtra actividades locales por rango de fechas', () async {
+    SharedPreferences.setMockInitialValues({});
+    final repository = AgendaRepository();
+    await repository.crear(AgendaItem(
+      id: 0, titulo: 'Examen parcial', tipo: 'evaluacion',
+      fecha: DateTime(2026, 11, 24),
+    ));
+    await repository.crear(AgendaItem(
+      id: 0, titulo: 'Entrega siguiente', tipo: 'tarea',
+      fecha: DateTime(2026, 12, 2),
+    ));
+
+    final evaluacion = await repository.listar(
+      desde: DateTime(2026, 11, 20),
+      hasta: DateTime(2026, 11, 30),
+    );
+    expect(evaluacion, hasLength(1));
+    expect(evaluacion.single.titulo, 'Examen parcial');
+    repository.dispose();
+  });
+
+  test('Consulta autenticada envia desde y hasta a la API', () async {
+    final client = MockClient((request) async {
+      expect(request.method, 'GET');
+      expect(request.url.queryParameters['desde'], '2026-11-20');
+      expect(request.url.queryParameters['hasta'], '2026-11-30');
+      expect(request.headers['authorization'], 'Bearer token-prueba');
+      return http.Response('[]', 200,
+        headers: {'content-type': 'application/json; charset=utf-8'});
+    });
+    final repository = AgendaRepository(accessToken: 'token-prueba', client: client);
+
+    expect(await repository.listar(
+      desde: DateTime(2026, 11, 20),
+      hasta: DateTime(2026, 11, 30),
+    ), isEmpty);
+    repository.dispose();
+  });
 }

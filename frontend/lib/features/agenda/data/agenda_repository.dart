@@ -120,12 +120,30 @@ class AgendaRepository {
     if (!saved) throw const FormatException('No se pudo guardar la agenda local.');
   }
 
-  Future<List<AgendaItem>> listar() async {
+  Future<List<AgendaItem>> listar({
+    DateTime? desde,
+    DateTime? hasta,
+  }) async {
     final List<AgendaItem> items;
     if (local) {
       items = await _readLocal();
+      items.removeWhere((item) {
+        if (desde != null && item.fecha.isBefore(DateTime(desde.year, desde.month, desde.day))) {
+          return true;
+        }
+        if (hasta != null && item.fecha.isAfter(DateTime(hasta.year, hasta.month, hasta.day))) {
+          return true;
+        }
+        return false;
+      });
     } else {
-      final response = await _client.get(_url(), headers: _headers)
+      final query = <String, String>{};
+      if (desde != null) query['desde'] = fechaTexto(desde);
+      if (hasta != null) query['hasta'] = fechaTexto(hasta);
+      final response = await _client.get(
+        _url().replace(queryParameters: query),
+        headers: _headers,
+      )
           .timeout(const Duration(seconds: 12));
       final data = _extract(response) as List<dynamic>;
       items = data.map((entry) => AgendaItem.fromJson(Map<String, dynamic>.from(entry as Map))).toList();
