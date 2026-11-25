@@ -117,3 +117,4 @@ button:focus-visible {
         padding: 0 !important;
     }
 }
+input[type="range"] { accent-color: #0fa958; }
